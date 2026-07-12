@@ -1,0 +1,38 @@
+# Operating system
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.iml
+
+# Temporary project folders
+Temp/
+Backups/
+Exports/
+Imports/
+
+# Flutter / Dart
+Flutter/.dart_tool/
+Flutter/.flutter-plugins
+Flutter/.flutter-plugins-dependencies
+Flutter/.packages
+Flutter/build/
+Flutter/coverage/
+Flutter/android/.gradle/
+Flutter/android/local.properties
+Flutter/ios/Pods/
+Flutter/ios/.symlinks/
+Flutter/macos/Pods/
+Flutter/windows/flutter/ephemeral/
+Flutter/linux/flutter/ephemeral/
+Flutter/macos/Flutter/ephemeral/
+
+# Secrets and local environment
+.env
+.env.*
+*.keystore
+*.jks
+key.properties
