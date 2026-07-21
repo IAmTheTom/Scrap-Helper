@@ -1,32 +1,38 @@
-# Scrap Helper
+# Scrap Helper Pack 09 — Database Layer
 
-Scrap Helper is an Android-first, local-first application for evaluating scrap pickups, estimating recoverable value, building scrapyard loads, recording receipts, and comparing estimated versus actual results.
+This pack installs and validates the first working SQLite layer.
 
-## Core Principles
+## Adds
 
-- deterministic calculations;
-- local SQLite storage;
-- no account or cloud requirement;
-- editable object, component, category, yard, and price records;
-- US customary and metric display support;
-- immutable finalized-load snapshots;
-- receipt-based history;
-- optional image identification only as a future helper.
+- sqflite
+- path
+- path_provider
+- flutter_riverpod
+- sqflite_common_ffi
+- executable schema_v1.dart
+- AppDatabase opener
+- foreign-key enforcement
+- schema metadata initialization
+- database constraint and trigger tests
 
-## Project Areas
+## Install
 
-- `Docs` — architecture, specifications, implementation, and decisions
-- `Knowledge` — researched and measured scrap knowledge
-- `Templates` — reusable knowledge-record templates
-- `SQL` — authoritative database schema
-- `Flutter` — application source
-- `Data` — sample and test data
-- `Tools` — reproducible setup and maintenance scripts
+Copy all PowerShell scripts from this pack into:
 
-## Current Status
+C:\Users\tnkfi\AI Building\Scrap Helper\Tools
 
-- project structure created;
-- knowledge templates created;
-- core safety, pricing, category, and yard guidance populated;
-- starter object, material, and component records populated;
-- Flutter implementation not yet started.
+Then run from the Scrap Helper project root:
+
+```powershell
+Unblock-File ".\Tools\Run-Pack-09.ps1"
+& ".\Tools\Run-Pack-09.ps1"
+```
+
+## Success criteria
+
+The output must end with:
+
+SQLite database layer installed and validated successfully.
+Schema statements: 25
+
+Do not commit if the pack reports an error.
