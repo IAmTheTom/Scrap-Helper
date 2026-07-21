@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 
 abstract final class FileSelectionService {
   static Future<String?> selectBackup() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const <String>['json'],
     );
@@ -10,7 +10,7 @@ abstract final class FileSelectionService {
   }
 
   static Future<String?> selectAttachment() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const <String>['jpg', 'jpeg', 'png', 'webp', 'pdf'],
     );
