@@ -5,6 +5,7 @@ import '../finalize/finalize_load_page.dart';
 import '../history/history_page.dart';
 import '../loads/load_builder_page.dart';
 import '../objects/object_browser_page.dart';
+import '../performance/performance_page.dart';
 import '../prices/prices_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -23,7 +24,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Estimate a load, lock the estimate, enter the yard receipt, and compare actual results.',
+            'Estimate loads, record actual results, and learn which items pay best for you.',
           ),
           const SizedBox(height: 20),
           _ActionCard(
@@ -55,6 +56,13 @@ class HomePage extends StatelessWidget {
             title: 'Loads, Receipts & Results',
             subtitle: 'Compare estimates with actual yard payouts.',
             onTap: () => _open(context, const HistoryPage()),
+          ),
+          _ActionCard(
+            icon: Icons.insights,
+            title: 'Personal Performance',
+            subtitle:
+                'See best items, net/hour, accuracy, and recommendations.',
+            onTap: () => _open(context, const PerformancePage()),
           ),
           const SizedBox(height: 20),
           const Card(

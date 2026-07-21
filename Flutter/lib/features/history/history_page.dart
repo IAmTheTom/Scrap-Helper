@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/history_models.dart';
 import '../../data/repositories/history_repository.dart';
+import '../performance/record_performance_page.dart';
 import '../receipts/receipt_entry_page.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -29,6 +30,20 @@ class _HistoryPageState extends State<HistoryPage> {
     await Navigator.push(
       context,
       MaterialPageRoute<void>(builder: (_) => ReceiptEntryPage(load: load)),
+    );
+    if (mounted) setState(_reload);
+  }
+
+  Future<void> _recordPerformance(FinalizedLoadSummary load) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => RecordPerformancePage(
+          loadId: load.loadId,
+          actualPaidCents: load.actualPaidCents,
+          estimatedLikelyCents: load.estimatedLikelyCents,
+        ),
+      ),
     );
     if (mounted) setState(_reload);
   }
@@ -82,20 +97,24 @@ class _HistoryPageState extends State<HistoryPage> {
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         Text(
-                          'Difference from likely: '
-                          '${variance >= 0 ? '+' : '-'}'
+                          'Difference: ${variance >= 0 ? '+' : '-'}'
                           '\$${(variance.abs() / 100).toStringAsFixed(2)}',
                         ),
                       ] else
                         const Text('No receipt entered yet.'),
-                      Row(
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 4,
                         children: [
-                          Text('${load.itemCount} load item record(s)'),
-                          const Spacer(),
                           TextButton.icon(
                             onPressed: () => _addReceipt(load),
                             icon: const Icon(Icons.receipt_long),
-                            label: const Text('Add Receipt'),
+                            label: const Text('Receipt'),
+                          ),
+                          TextButton.icon(
+                            onPressed: () => _recordPerformance(load),
+                            icon: const Icon(Icons.insights),
+                            label: const Text('Work & Costs'),
                           ),
                         ],
                       ),

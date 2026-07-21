@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../config/app_config.dart';
 import 'schema_v1.dart';
+import 'schema_v2.dart';
 
 final class AppDatabase {
   AppDatabase._();
@@ -35,11 +36,14 @@ final class AppDatabase {
         },
         onCreate: (db, version) async {
           await _createV1(db);
+          if (version >= SchemaV2.version) {
+            await _applyV2(db);
+          }
         },
         onUpgrade: (db, oldVersion, newVersion) async {
-          throw StateError(
-            'No database migration exists from $oldVersion to $newVersion.',
-          );
+          if (oldVersion < SchemaV2.version && newVersion >= SchemaV2.version) {
+            await _applyV2(db);
+          }
         },
       ),
     );
@@ -62,6 +66,20 @@ final class AppDatabase {
         'value': 'none',
         'updated_at': now,
       });
+    });
+  }
+
+  static Future<void> _applyV2(Database db) async {
+    await db.transaction((txn) async {
+      for (final statement in SchemaV2.statements) {
+        await txn.execute(statement);
+      }
+
+      await txn.insert('app_metadata', <String, Object?>{
+        'key': 'schema_version',
+        'value': SchemaV2.version.toString(),
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
 
