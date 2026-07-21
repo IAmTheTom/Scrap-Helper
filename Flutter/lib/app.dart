@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'config/app_config.dart';
+import 'features/home/home_page.dart';
 
 class ScrapHelperApp extends StatelessWidget {
   const ScrapHelperApp({super.key});
@@ -12,16 +14,11 @@ class ScrapHelperApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
-      ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text(AppConfig.appName)),
-        body: const Center(
-          child: Text(
-            'Core foundation installed.\nNext: SQLite database.',
-            textAlign: TextAlign.center,
-          ),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
         ),
       ),
+      home: const HomePage(),
     );
   }
 }
