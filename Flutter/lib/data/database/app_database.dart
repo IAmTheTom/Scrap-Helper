@@ -5,6 +5,8 @@ import 'package:sqflite/sqflite.dart';
 import '../../config/app_config.dart';
 import 'schema_v1.dart';
 import 'schema_v2.dart';
+import 'schema_v3.dart';
+import 'schema_v4.dart';
 
 final class AppDatabase {
   AppDatabase._();
@@ -37,12 +39,24 @@ final class AppDatabase {
         onCreate: (db, version) async {
           await _createV1(db);
           if (version >= SchemaV2.version) {
-            await _applyV2(db);
+            await _applyStatements(db, SchemaV2.statements, SchemaV2.version);
+          }
+          if (version >= SchemaV3.version) {
+            await _applyStatements(db, SchemaV3.statements, SchemaV3.version);
+          }
+          if (version >= SchemaV4.version) {
+            await _applyStatements(db, SchemaV4.statements, SchemaV4.version);
           }
         },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < SchemaV2.version && newVersion >= SchemaV2.version) {
-            await _applyV2(db);
+            await _applyStatements(db, SchemaV2.statements, SchemaV2.version);
+          }
+          if (oldVersion < SchemaV3.version && newVersion >= SchemaV3.version) {
+            await _applyStatements(db, SchemaV3.statements, SchemaV3.version);
+          }
+          if (oldVersion < SchemaV4.version && newVersion >= SchemaV4.version) {
+            await _applyStatements(db, SchemaV4.statements, SchemaV4.version);
           }
         },
       ),
@@ -69,15 +83,19 @@ final class AppDatabase {
     });
   }
 
-  static Future<void> _applyV2(Database db) async {
+  static Future<void> _applyStatements(
+    Database db,
+    List<String> statements,
+    int version,
+  ) async {
     await db.transaction((txn) async {
-      for (final statement in SchemaV2.statements) {
+      for (final statement in statements) {
         await txn.execute(statement);
       }
 
       await txn.insert('app_metadata', <String, Object?>{
         'key': 'schema_version',
-        'value': SchemaV2.version.toString(),
+        'value': version.toString(),
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     });

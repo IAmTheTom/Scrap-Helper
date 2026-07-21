@@ -5,27 +5,31 @@ import 'package:scrap_helper/data/database/app_database.dart';
 void main() {
   setUpAll(sqfliteFfiInit);
 
-  test('creates version two performance tables', () async {
-    final db = await AppDatabase.openAtPath(
-      inMemoryDatabasePath,
-      factory: databaseFactoryFfi,
-    );
+  test(
+    'retains version two performance tables after later migrations',
+    () async {
+      final db = await AppDatabase.openAtPath(
+        inMemoryDatabasePath,
+        factory: databaseFactoryFfi,
+      );
 
-    final tables = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type = 'table'",
-    );
-    final names = tables.map((row) => row['name']);
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table'",
+      );
+      final names = tables.map((row) => row['name']);
 
-    expect(names, contains('load_costs'));
-    expect(names, contains('load_item_outcomes'));
+      expect(names, contains('load_costs'));
+      expect(names, contains('load_item_outcomes'));
 
-    final metadata = await db.query(
-      'app_metadata',
-      where: 'key = ?',
-      whereArgs: const <Object?>['schema_version'],
-    );
-    expect(metadata.single['value'], '2');
+      final metadata = await db.query(
+        'app_metadata',
+        where: 'key = ?',
+        whereArgs: const <Object?>['schema_version'],
+      );
 
-    await db.close();
-  });
+      expect(metadata.single['value'], '4');
+
+      await db.close();
+    },
+  );
 }
