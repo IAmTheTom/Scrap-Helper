@@ -7,6 +7,7 @@ import 'schema_v1.dart';
 import 'schema_v2.dart';
 import 'schema_v3.dart';
 import 'schema_v4.dart';
+import 'schema_v5.dart';
 
 final class AppDatabase {
   AppDatabase._();
@@ -47,6 +48,9 @@ final class AppDatabase {
           if (version >= SchemaV4.version) {
             await _applyStatements(db, SchemaV4.statements, SchemaV4.version);
           }
+          if (version >= SchemaV5.version) {
+            await _applyStatements(db, SchemaV5.statements, SchemaV5.version);
+          }
         },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < SchemaV2.version && newVersion >= SchemaV2.version) {
@@ -57,6 +61,9 @@ final class AppDatabase {
           }
           if (oldVersion < SchemaV4.version && newVersion >= SchemaV4.version) {
             await _applyStatements(db, SchemaV4.statements, SchemaV4.version);
+          }
+          if (oldVersion < SchemaV5.version && newVersion >= SchemaV5.version) {
+            await _applyStatements(db, SchemaV5.statements, SchemaV5.version);
           }
         },
       ),

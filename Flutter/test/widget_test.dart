@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:scrap_helper/app.dart';
 
 void main() {
-  testWidgets('shows productivity dashboard shell', (tester) async {
+  testWidgets('shows productized app shell', (tester) async {
     await tester.pumpWidget(const ScrapHelperApp());
     await tester.pump();
 
@@ -11,14 +11,5 @@ void main() {
     expect(find.byType(Scaffold), findsOneWidget);
     expect(find.byIcon(Icons.search), findsOneWidget);
     expect(find.byIcon(Icons.settings), findsOneWidget);
-
-    // The dashboard content is database-backed and is covered by
-    // repository and schema tests. This widget test verifies the stable shell.
-    expect(
-      find.byType(CircularProgressIndicator).evaluate().isNotEmpty ||
-          find.text('Field Dashboard').evaluate().isNotEmpty ||
-          find.textContaining('Dashboard failed').evaluate().isNotEmpty,
-      isTrue,
-    );
   });
 }

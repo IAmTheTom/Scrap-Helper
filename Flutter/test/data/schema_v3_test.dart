@@ -25,7 +25,7 @@ void main() {
       where: 'key = ?',
       whereArgs: const <Object?>['schema_version'],
     );
-    expect(metadata.single['value'], '4');
+    expect(metadata.single['value'], '5');
 
     await db.close();
   });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/productivity_models.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../backup/backup_restore_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -54,6 +55,24 @@ class _SettingsPageState extends State<SettingsPage> {
     ).showSnackBar(const SnackBar(content: Text('Settings saved.')));
   }
 
+  void _replace({
+    String? weightDisplaySystem,
+    String? themeMode,
+    String? defaultRecoveryLevel,
+  }) {
+    final current = _preferences!;
+    setState(() {
+      _preferences = AppPreferences(
+        weightDisplaySystem: weightDisplaySystem ?? current.weightDisplaySystem,
+        themeMode: themeMode ?? current.themeMode,
+        travelCostCentsPerMile: current.travelCostCentsPerMile,
+        defaultRecoveryLevel:
+            defaultRecoveryLevel ?? current.defaultRecoveryLevel,
+        currencyCode: current.currencyCode,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,15 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   DropdownMenuItem(value: 'METRIC', child: Text('Metric')),
                 ],
-                onChanged: (value) => setState(() {
-                  _preferences = AppPreferences(
-                    weightDisplaySystem: value!,
-                    themeMode: preferences.themeMode,
-                    travelCostCentsPerMile: preferences.travelCostCentsPerMile,
-                    defaultRecoveryLevel: preferences.defaultRecoveryLevel,
-                    currencyCode: preferences.currencyCode,
-                  );
-                }),
+                onChanged: (value) => _replace(weightDisplaySystem: value),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -106,15 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   DropdownMenuItem(value: 'LIGHT', child: Text('Light')),
                   DropdownMenuItem(value: 'DARK', child: Text('Dark')),
                 ],
-                onChanged: (value) => setState(() {
-                  _preferences = AppPreferences(
-                    weightDisplaySystem: preferences.weightDisplaySystem,
-                    themeMode: value!,
-                    travelCostCentsPerMile: preferences.travelCostCentsPerMile,
-                    defaultRecoveryLevel: preferences.defaultRecoveryLevel,
-                    currencyCode: preferences.currencyCode,
-                  );
-                }),
+                onChanged: (value) => _replace(themeMode: value),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -140,21 +143,24 @@ class _SettingsPageState extends State<SettingsPage> {
                   DropdownMenuItem(value: 'STANDARD', child: Text('Standard')),
                   DropdownMenuItem(value: 'DEEP', child: Text('Deep')),
                 ],
-                onChanged: (value) => setState(() {
-                  _preferences = AppPreferences(
-                    weightDisplaySystem: preferences.weightDisplaySystem,
-                    themeMode: preferences.themeMode,
-                    travelCostCentsPerMile: preferences.travelCostCentsPerMile,
-                    defaultRecoveryLevel: value!,
-                    currencyCode: preferences.currencyCode,
-                  );
-                }),
+                onChanged: (value) => _replace(defaultRecoveryLevel: value),
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _save,
                 icon: const Icon(Icons.save),
                 label: const Text('Save Settings'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const BackupRestorePage(),
+                  ),
+                ),
+                icon: const Icon(Icons.backup),
+                label: const Text('Backup & Restore'),
               ),
             ],
           );
