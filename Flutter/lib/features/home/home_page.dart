@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../config/app_config.dart';
+import '../finalize/finalize_load_page.dart';
+import '../history/history_page.dart';
 import '../loads/load_builder_page.dart';
 import '../objects/object_browser_page.dart';
 import '../prices/prices_page.dart';
@@ -21,7 +23,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Set current yard prices, add objects, and build a working load estimate.',
+            'Estimate a load, lock the estimate, enter the yard receipt, and compare actual results.',
           ),
           const SizedBox(height: 20),
           _ActionCard(
@@ -33,21 +35,33 @@ class HomePage extends StatelessWidget {
           _ActionCard(
             icon: Icons.search,
             title: 'Evaluate an Object',
-            subtitle: 'Browse starter objects and choose recovery depth.',
+            subtitle: 'Browse objects and choose recovery depth.',
             onTap: () => _open(context, const ObjectBrowserPage()),
           ),
           _ActionCard(
             icon: Icons.local_shipping,
             title: 'Current Load',
-            subtitle: 'Review objects and low / likely / high payout.',
+            subtitle: 'Review the draft load and estimated payout.',
             onTap: () => _open(context, const LoadBuilderPage()),
+          ),
+          _ActionCard(
+            icon: Icons.lock,
+            title: 'Finalize Current Load',
+            subtitle: 'Create an immutable estimate snapshot.',
+            onTap: () => _open(context, const FinalizeLoadPage()),
+          ),
+          _ActionCard(
+            icon: Icons.history,
+            title: 'Loads, Receipts & Results',
+            subtitle: 'Compare estimates with actual yard payouts.',
+            onTap: () => _open(context, const HistoryPage()),
           ),
           const SizedBox(height: 20),
           const Card(
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'This first usable slice deliberately excludes accounts, cloud sync, ads, gamification, and AI. All calculations are local and deterministic.',
+                'All data and calculations remain local. No accounts, cloud sync, ads, subscriptions, or required AI.',
               ),
             ),
           ),
