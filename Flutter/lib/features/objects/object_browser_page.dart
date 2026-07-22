@@ -151,6 +151,7 @@ class _ObjectBrowserPageState extends State<ObjectBrowserPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: null,
         onPressed: _addObject,
         icon: const Icon(Icons.add),
         label: const Text('Add Object'),

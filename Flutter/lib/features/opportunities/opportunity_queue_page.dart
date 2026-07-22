@@ -178,6 +178,7 @@ class _OpportunityQueuePageState extends State<OpportunityQueuePage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: null,
         onPressed: _create,
         icon: const Icon(Icons.add),
         label: const Text('Add Pickup'),

@@ -99,6 +99,7 @@ class _StoragePageState extends State<StoragePage> {
       floatingActionButton: FutureBuilder<_StorageData>(
         future: _future,
         builder: (context, snapshot) => FloatingActionButton.extended(
+          heroTag: null,
           onPressed: snapshot.hasData
               ? () => _add(snapshot.data!.summaries)
               : null,

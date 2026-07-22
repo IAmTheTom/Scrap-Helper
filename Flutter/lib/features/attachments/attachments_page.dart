@@ -110,6 +110,7 @@ class _AttachmentsPageState extends State<AttachmentsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: null,
         onPressed: _add,
         icon: const Icon(Icons.add_photo_alternate),
         label: const Text('Attach'),
