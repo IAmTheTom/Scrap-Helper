@@ -4,6 +4,7 @@ import '../../data/models/reference_models.dart';
 import '../../data/repositories/scrap_repository.dart';
 import '../../domain/enums/app_enums.dart';
 import '../loads/load_builder_page.dart';
+import 'object_editor_page.dart';
 
 class ObjectBrowserPage extends StatefulWidget {
   const ObjectBrowserPage({super.key});
@@ -20,34 +21,81 @@ class _ObjectBrowserPageState extends State<ObjectBrowserPage> {
   @override
   void initState() {
     super.initState();
-    _future = _repository.getObjects();
+    _reload();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _reload() {
+    _future = _repository.getObjects(search: _searchController.text);
   }
 
   void _search() {
-    setState(() {
-      _future = _repository.getObjects(search: _searchController.text);
-    });
+    setState(_reload);
+  }
+
+  Future<void> _addObject() async {
+    final created = await Navigator.push<ObjectTemplate>(
+      context,
+      MaterialPageRoute<ObjectTemplate>(
+        builder: (_) => const ObjectEditorPage(),
+      ),
+    );
+
+    if (created != null && mounted) {
+      _searchController.clear();
+      setState(_reload);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${created.name} added to Object Library.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Object Library')),
+      appBar: AppBar(
+        title: const Text('Object Library'),
+        actions: [
+          IconButton(
+            onPressed: _addObject,
+            tooltip: 'Add object',
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: SearchBar(
-              controller: _searchController,
-              hintText: 'Search objects',
-              leading: const Icon(Icons.search),
-              trailing: [
-                IconButton(
-                  onPressed: _search,
-                  icon: const Icon(Icons.arrow_forward),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SearchBar(
+                    controller: _searchController,
+                    hintText: 'Search objects',
+                    leading: const Icon(Icons.search),
+                    trailing: [
+                      IconButton(
+                        onPressed: _search,
+                        icon: const Icon(Icons.arrow_forward),
+                      ),
+                    ],
+                    onSubmitted: (_) => _search(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  onPressed: _addObject,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add'),
                 ),
               ],
-              onSubmitted: (_) => _search(),
             ),
           ),
           Expanded(
@@ -55,20 +103,27 @@ class _ObjectBrowserPageState extends State<ObjectBrowserPage> {
               future: _future,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(child: Text('Load failed: ${snapshot.error}'));
+                  return Center(
+                    child: Text('Object Library failed: ${snapshot.error}'),
+                  );
                 }
+
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
                 final objects = snapshot.data!;
+
                 if (objects.isEmpty) {
-                  return const Center(child: Text('No matching objects.'));
+                  return _EmptyLibrary(onAdd: _addObject);
                 }
+
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 88),
                   itemCount: objects.length,
                   itemBuilder: (context, index) {
                     final object = objects[index];
+
                     return Card(
                       child: ListTile(
                         leading: const CircleAvatar(
@@ -76,7 +131,8 @@ class _ObjectBrowserPageState extends State<ObjectBrowserPage> {
                         ),
                         title: Text(object.name),
                         subtitle: Text(
-                          '${(object.wholeWeightTypicalG / 453.59237).toStringAsFixed(0)} lb typical • ${object.confidence.dbValue} confidence',
+                          '${(object.wholeWeightTypicalG / 453.59237).toStringAsFixed(0)} lb typical'
+                          '${object.subtype.isEmpty ? '' : ' • ${object.subtype}'}',
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => Navigator.push(
@@ -93,6 +149,48 @@ class _ObjectBrowserPageState extends State<ObjectBrowserPage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _addObject,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Object'),
+      ),
+    );
+  }
+}
+
+class _EmptyLibrary extends StatelessWidget {
+  const _EmptyLibrary({required this.onAdd});
+
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.inventory_2_outlined, size: 56),
+            const SizedBox(height: 12),
+            Text(
+              'No matching objects',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Add an object to use it in pickups and loads.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Object'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -114,14 +212,29 @@ class _ObjectDetailPageState extends State<ObjectDetailPage> {
 
   Future<void> _add() async {
     final yards = await _repository.getScrapyards();
+
+    if (yards.isEmpty) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Add a scrapyard before creating a load.'),
+        ),
+      );
+      return;
+    }
+
     final load = await _repository.getOrCreateDraftLoad(yards.first.id!);
+
     await _repository.addObjectToLoad(
       loadId: load.id,
       objectTemplateId: widget.object.id!,
       recoveryLevel: _level,
       quantity: _quantity,
     );
+
     if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${widget.object.name} added to current load.')),
     );
@@ -134,15 +247,17 @@ class _ObjectDetailPageState extends State<ObjectDetailPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            widget.object.description ?? '',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          if ((widget.object.description ?? '').isNotEmpty)
+            Text(
+              widget.object.description!,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           const SizedBox(height: 12),
           _InfoCard(
             title: 'Typical whole weight',
             value:
-                '${(widget.object.wholeWeightLowG / 453.59237).toStringAsFixed(0)}–${(widget.object.wholeWeightHighG / 453.59237).toStringAsFixed(0)} lb',
+                '${(widget.object.wholeWeightLowG / 453.59237).toStringAsFixed(0)}–'
+                '${(widget.object.wholeWeightHighG / 453.59237).toStringAsFixed(0)} lb',
           ),
           if (widget.object.safetyWarnings != null)
             _InfoCard(
@@ -158,15 +273,19 @@ class _ObjectDetailPageState extends State<ObjectDetailPage> {
           const SizedBox(height: 12),
           DropdownButtonFormField<RecoveryLevel>(
             initialValue: _level,
-            decoration: const InputDecoration(
-              labelText: 'Recovery level',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Recovery level'),
             items: [
               for (final level in RecoveryLevel.values)
-                DropdownMenuItem(value: level, child: Text(_label(level))),
+                DropdownMenuItem(
+                  value: level,
+                  child: Text(_recoveryLabel(level)),
+                ),
             ],
-            onChanged: (value) => setState(() => _level = value!),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _level = value);
+              }
+            },
           ),
           const SizedBox(height: 12),
           Row(
@@ -204,12 +323,14 @@ class _ObjectDetailPageState extends State<ObjectDetailPage> {
     );
   }
 
-  static String _label(RecoveryLevel level) => switch (level) {
-    RecoveryLevel.sellWhole => 'Sell whole',
-    RecoveryLevel.quick => 'Quick strip',
-    RecoveryLevel.standard => 'Standard strip',
-    RecoveryLevel.deep => 'Deep recovery',
-  };
+  static String _recoveryLabel(RecoveryLevel level) {
+    return switch (level) {
+      RecoveryLevel.sellWhole => 'Sell whole',
+      RecoveryLevel.quick => 'Quick strip',
+      RecoveryLevel.standard => 'Standard strip',
+      RecoveryLevel.deep => 'Deep recovery',
+    };
+  }
 }
 
 class _InfoCard extends StatelessWidget {

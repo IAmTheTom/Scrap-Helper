@@ -3,13 +3,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:scrap_helper/app.dart';
 
 void main() {
-  testWidgets('shows productized app shell', (tester) async {
+  testWidgets('shows core field navigation and utility menu', (tester) async {
     await tester.pumpWidget(const ScrapHelperApp());
     await tester.pump();
 
-    expect(find.text('Scrap Helper'), findsOneWidget);
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.byIcon(Icons.search), findsOneWidget);
-    expect(find.byIcon(Icons.settings), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Pickups'), findsOneWidget);
+    expect(find.text('Load'), findsOneWidget);
+    expect(find.text('Objects'), findsOneWidget);
+    expect(find.text('Storage'), findsOneWidget);
+
+    expect(find.byType(PopupMenuButton<String>), findsOneWidget);
+    expect(find.text('Search Everything'), findsNothing);
   });
 }

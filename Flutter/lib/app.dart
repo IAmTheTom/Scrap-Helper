@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'config/app_config.dart';
-import 'features/home/home_page.dart';
+import 'features/home/field_shell.dart';
 
 class ScrapHelperApp extends StatelessWidget {
   const ScrapHelperApp({super.key, this.themeMode = ThemeMode.system});
@@ -33,7 +33,7 @@ class ScrapHelperApp extends StatelessWidget {
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const HomePage(),
+      home: const FieldShell(),
     );
   }
 }

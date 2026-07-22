@@ -43,6 +43,56 @@ final class ScrapRepository {
     return rows.map(ObjectTemplate.fromMap).toList();
   }
 
+  Future<ObjectTemplate> createObject({
+    required String name,
+    String subtype = '',
+    String? description,
+    required int wholeWeightLowG,
+    required int wholeWeightTypicalG,
+    required int wholeWeightHighG,
+    ConfidenceLevel confidence = ConfidenceLevel.low,
+    String? safetyWarnings,
+    String? preparationNotes,
+  }) async {
+    final trimmedName = name.trim();
+
+    if (trimmedName.isEmpty) {
+      throw const FormatException('Object name is required.');
+    }
+
+    if (wholeWeightLowG < 0 ||
+        wholeWeightTypicalG < wholeWeightLowG ||
+        wholeWeightHighG < wholeWeightTypicalG) {
+      throw const FormatException('Weight must follow low ≤ typical ≤ high.');
+    }
+
+    final db = await _db;
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    final id = await db.insert('object_templates', <String, Object?>{
+      'name': trimmedName,
+      'subtype': subtype.trim(),
+      'description': _nullIfBlank(description),
+      'whole_weight_low_g': wholeWeightLowG,
+      'whole_weight_typical_g': wholeWeightTypicalG,
+      'whole_weight_high_g': wholeWeightHighG,
+      'weight_confidence': confidence.dbValue,
+      'safety_warnings': _nullIfBlank(safetyWarnings),
+      'preparation_notes': _nullIfBlank(preparationNotes),
+      'source_type': SourceType.manual.dbValue,
+      'created_at': now,
+      'updated_at': now,
+      'is_active': 1,
+    });
+
+    return getObject(id);
+  }
+
+  static String? _nullIfBlank(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   Future<ObjectTemplate> getObject(int id) async {
     final db = await _db;
     final rows = await db.query(
