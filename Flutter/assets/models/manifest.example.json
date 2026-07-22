@@ -1,0 +1,21 @@
+{
+  "model_name": "Scrap Helper Detector",
+  "model_version": "0.1.0",
+  "taxonomy_version": "1.0.0",
+  "runtime": "tflite",
+  "model_file": "scrap_detector.tflite",
+  "model_sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+  "minimum_app_version": "0.9.1",
+  "input": {
+    "width": 320,
+    "height": 320,
+    "channels": 3,
+    "data_type": "uint8",
+    "normalization": "none"
+  },
+  "output": {
+    "kind": "object_detection",
+    "label_file": "labels.txt",
+    "maximum_detections": 20
+  }
+}
