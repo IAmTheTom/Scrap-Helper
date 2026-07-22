@@ -1,18 +1,28 @@
 param(
     [string]$Device = "windows",
-    [string]$TestFile = "integration_test\app_workflows_test.dart"
+    [string]$TestTarget = "integration_test"
 )
 
 $ErrorActionPreference = "Stop"
+
 $ProjectRoot = Split-Path $PSScriptRoot -Parent
 $FlutterRoot = Join-Path $ProjectRoot "Flutter"
 
 Push-Location $FlutterRoot
 try {
-    flutter test $TestFile -d $Device --reporter expanded
-    if ($LASTEXITCODE -ne 0) { throw "Integration test failed." }
+    Write-Host "Running Scrap Helper integration suite..."
+    Write-Host "Device: $Device"
+    Write-Host "Target: $TestTarget"
     Write-Host ""
-    Write-Host "Integration test passed."
+
+    flutter test $TestTarget -d $Device --reporter expanded
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Integration suite failed."
+    }
+
+    Write-Host ""
+    Write-Host "Integration suite passed."
 }
 finally {
     Pop-Location

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../ai/ai_item_advisor_page.dart';
 import '../backup/backup_restore_page.dart';
 import '../exports/exports_page.dart';
+import '../finalize/finalize_load_page.dart';
 import '../history/history_page.dart';
 import '../loads/load_builder_page.dart';
 import '../objects/object_browser_page.dart';
@@ -44,6 +46,12 @@ class _FieldShellState extends State<FieldShell> {
 
   void _openUtility(String value) {
     switch (value) {
+      case 'advisor':
+        _openPage(const AiItemAdvisorPage());
+        return;
+      case 'finalize':
+        _openPage(const FinalizeLoadPage());
+        return;
       case 'history':
         _openPage(const HistoryPage());
         return;
@@ -87,6 +95,20 @@ class _FieldShellState extends State<FieldShell> {
                   icon: const Icon(Icons.more_vert),
                   onSelected: _openUtility,
                   itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: 'advisor',
+                      child: ListTile(
+                        leading: Icon(Icons.auto_awesome),
+                        title: Text('Item Advisor'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'finalize',
+                      child: ListTile(
+                        leading: Icon(Icons.lock),
+                        title: Text('Finalize Current Load'),
+                      ),
+                    ),
                     PopupMenuItem(
                       value: 'history',
                       child: ListTile(
