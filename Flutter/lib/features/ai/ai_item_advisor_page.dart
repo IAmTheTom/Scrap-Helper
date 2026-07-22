@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../ai/item_analysis_models.dart';
 import '../../ai/item_analysis_service.dart';
 import '../../ai/mock_item_analysis_provider.dart';
+import '../../services/item_image_service.dart';
 
 class AiItemAdvisorPage extends StatefulWidget {
   const AiItemAdvisorPage({super.key});
@@ -15,9 +18,11 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
   final _description = TextEditingController();
   final _miles = TextEditingController();
   final _minutes = TextEditingController();
+  final _images = ItemImageService();
 
   bool _enableSimulatedAi = false;
   bool _working = false;
+  String? _imagePath;
   ItemAnalysisResult? _result;
 
   @override
@@ -28,16 +33,44 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
     super.dispose();
   }
 
+  Future<void> _chooseImage() async {
+    final path = await _images.chooseFromGallery();
+    if (!mounted || path == null) return;
+    setState(() {
+      _imagePath = path;
+      _result = null;
+    });
+  }
+
+  Future<void> _takePhoto() async {
+    final path = await _images.takePhoto();
+    if (!mounted || path == null) return;
+    setState(() {
+      _imagePath = path;
+      _result = null;
+    });
+  }
+
+  Future<void> _removeImage() async {
+    final current = _imagePath;
+    setState(() {
+      _imagePath = null;
+      _result = null;
+    });
+    await _images.deleteLocalImage(current);
+  }
+
   Future<void> _analyze() async {
     final description = _description.text.trim();
-    if (description.isEmpty || _working) {
-      if (description.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Describe the item first.')),
-        );
-      }
+    if (description.isEmpty && _imagePath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Add a photo or describe the item first.'),
+        ),
+      );
       return;
     }
+    if (_working) return;
 
     setState(() => _working = true);
 
@@ -45,11 +78,13 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
       provider: const MockItemAnalysisProvider(),
       allowAi: _enableSimulatedAi,
       allowNetwork: false,
+      allowImages: _enableSimulatedAi,
     );
 
     final result = await service.analyze(
       ItemAnalysisRequest(
         description: description,
+        imagePath: _imagePath,
         roundTripMiles: double.tryParse(_miles.text.trim()),
         availableMinutes: int.tryParse(_minutes.text.trim()),
       ),
@@ -79,10 +114,18 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
             child: const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'Phase 27 foundation: structured item analysis with privacy-first controls. '
-                'The app uses deterministic scrap rules unless simulated AI is explicitly enabled.',
+                'Photos are copied into Scrap Helper local storage. '
+                'Nothing is uploaded in this phase. Deterministic rules remain the default.',
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          _ImageInputCard(
+            imagePath: _imagePath,
+            supportsCamera: _images.supportsCamera,
+            onChoose: _chooseImage,
+            onCamera: _takePhoto,
+            onRemove: _removeImage,
           ),
           const SizedBox(height: 12),
           TextField(
@@ -125,7 +168,7 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
             key: const Key('simulated_ai_switch'),
             value: _enableSimulatedAi,
             onChanged: (value) => setState(() => _enableSimulatedAi = value),
-            title: const Text('Use simulated AI'),
+            title: const Text('Use simulated visual AI'),
             subtitle: const Text(
               'Development-only provider. No image or text leaves this device.',
             ),
@@ -172,6 +215,95 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
   }
 }
 
+class _ImageInputCard extends StatelessWidget {
+  const _ImageInputCard({
+    required this.imagePath,
+    required this.supportsCamera,
+    required this.onChoose,
+    required this.onCamera,
+    required this.onRemove,
+  });
+
+  final String? imagePath;
+  final bool supportsCamera;
+  final VoidCallback onChoose;
+  final VoidCallback onCamera;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = imagePath;
+
+    return Card(
+      key: const Key('item_image_input'),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            if (path == null)
+              const SizedBox(
+                height: 150,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add_a_photo_outlined, size: 44),
+                      SizedBox(height: 8),
+                      Text('No item photo selected'),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(path),
+                  key: const Key('item_image_preview'),
+                  height: 240,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(
+                    height: 160,
+                    child: Center(child: Text('Could not display image')),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 8),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  key: const Key('choose_item_photo'),
+                  onPressed: onChoose,
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: Text(path == null ? 'Choose Photo' : 'Replace Photo'),
+                ),
+                if (supportsCamera)
+                  OutlinedButton.icon(
+                    key: const Key('take_item_photo'),
+                    onPressed: onCamera,
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: const Text('Take Photo'),
+                  ),
+                if (path != null)
+                  TextButton.icon(
+                    key: const Key('remove_item_photo'),
+                    onPressed: onRemove,
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Remove'),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _AnalysisResultCard extends StatelessWidget {
   const _AnalysisResultCard({required this.result});
 
@@ -193,6 +325,11 @@ class _AnalysisResultCard extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Text('$confidence% confidence • ${result.providerName}'),
+            if (result.usedImage)
+              const Text(
+                'Photo included in simulated analysis',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             const SizedBox(height: 12),
             _SectionTitle(
               icon: Icons.recommend,

@@ -18,13 +18,17 @@ final class MockItemAnalysisProvider implements ItemAnalysisProvider {
   bool get requiresNetwork => false;
 
   @override
+  bool get supportsImages => true;
+
+  @override
   Future<ItemAnalysisResult> analyze(ItemAnalysisRequest request) async {
     await Future<void>.delayed(delay);
     final fallback = const DeterministicItemAdvisor().analyze(request);
 
     return ItemAnalysisResult(
       objectName: fallback.objectName,
-      confidence: (fallback.confidence + 0.02).clamp(0.0, 0.99),
+      confidence: (fallback.confidence + (request.hasImage ? 0.03 : 0.02))
+          .clamp(0.0, 0.99),
       materials: [
         for (final material in fallback.materials)
           ItemMaterialSuggestion(
@@ -37,11 +41,14 @@ final class MockItemAnalysisProvider implements ItemAnalysisProvider {
       estimatedProcessingMinutes: fallback.estimatedProcessingMinutes,
       recommendation: fallback.recommendation,
       reasoning: [
-        'Simulated visual classification for development and testing.',
+        if (request.hasImage)
+          'Simulated visual provider received a locally stored image.',
+        'Simulated classification for development and testing.',
         ...fallback.reasoning,
       ],
       providerName: name,
       usedAi: true,
+      usedImage: request.hasImage,
     );
   }
 }

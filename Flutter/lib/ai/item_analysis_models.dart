@@ -5,13 +5,17 @@ enum ItemActionRecommendation { take, takeIfNearby, inspectFirst, skip }
 final class ItemAnalysisRequest {
   const ItemAnalysisRequest({
     required this.description,
+    this.imagePath,
     this.roundTripMiles,
     this.availableMinutes,
   });
 
   final String description;
+  final String? imagePath;
   final double? roundTripMiles;
   final int? availableMinutes;
+
+  bool get hasImage => imagePath != null && imagePath!.trim().isNotEmpty;
 }
 
 final class ItemMaterialSuggestion {
@@ -37,6 +41,7 @@ final class ItemAnalysisResult {
     required this.reasoning,
     required this.providerName,
     required this.usedAi,
+    required this.usedImage,
   });
 
   final String objectName;
@@ -48,4 +53,5 @@ final class ItemAnalysisResult {
   final List<String> reasoning;
   final String providerName;
   final bool usedAi;
+  final bool usedImage;
 }

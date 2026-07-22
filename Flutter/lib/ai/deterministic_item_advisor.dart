@@ -105,7 +105,7 @@ final class DeterministicItemAdvisor {
 
     return _result(
       objectName: 'Unknown Scrap Object',
-      confidence: 0.35,
+      confidence: request.hasImage ? 0.42 : 0.35,
       materials: const [
         ('Shred Steel', 0.45),
         ('Insulated Copper Wire', 0.28),
@@ -117,7 +117,9 @@ final class DeterministicItemAdvisor {
       ],
       minutes: 30,
       recommendation: ItemActionRecommendation.inspectFirst,
-      reasoning: const [
+      reasoning: [
+        if (request.hasImage)
+          'A photo is attached, but deterministic rules cannot inspect image pixels.',
         'The description is not specific enough for a confident identification.',
         'Confirm the object type and visible components before pickup.',
       ],
@@ -150,6 +152,7 @@ final class DeterministicItemAdvisor {
       reasoning: reasoning,
       providerName: 'Deterministic Scrap Rules',
       usedAi: false,
+      usedImage: false,
     );
   }
 }

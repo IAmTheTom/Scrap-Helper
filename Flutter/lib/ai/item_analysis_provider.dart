@@ -5,5 +5,7 @@ abstract interface class ItemAnalysisProvider {
 
   bool get requiresNetwork;
 
+  bool get supportsImages;
+
   Future<ItemAnalysisResult> analyze(ItemAnalysisRequest request);
 }
