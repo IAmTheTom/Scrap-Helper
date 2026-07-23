@@ -6,6 +6,7 @@ import '../exports/exports_page.dart';
 import '../finalize/finalize_load_page.dart';
 import '../history/history_page.dart';
 import '../loads/load_builder_page.dart';
+import '../models/local_model_manager_page.dart';
 import '../objects/object_browser_page.dart';
 import '../opportunities/opportunity_queue_page.dart';
 import '../performance/performance_page.dart';
@@ -48,6 +49,9 @@ class _FieldShellState extends State<FieldShell> {
     switch (value) {
       case 'advisor':
         _openPage(const AiItemAdvisorPage());
+        return;
+      case 'local_model':
+        _openPage(const LocalModelManagerPage());
         return;
       case 'finalize':
         _openPage(const FinalizeLoadPage());
@@ -100,6 +104,13 @@ class _FieldShellState extends State<FieldShell> {
                       child: ListTile(
                         leading: Icon(Icons.auto_awesome),
                         title: Text('Item Advisor'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'local_model',
+                      child: ListTile(
+                        leading: Icon(Icons.memory),
+                        title: Text('Local AI Model'),
                       ),
                     ),
                     PopupMenuItem(

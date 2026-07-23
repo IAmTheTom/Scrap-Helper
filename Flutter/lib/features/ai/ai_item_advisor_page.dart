@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import '../../ai/item_analysis_models.dart';
 import '../../ai/item_analysis_service.dart';
 import '../../ai/mock_item_analysis_provider.dart';
+import '../../recognition/runtime/local_classification_recognition_service.dart';
 import '../../services/item_image_service.dart';
+import '../recognition/recognition_review_page.dart';
 
 class AiItemAdvisorPage extends StatefulWidget {
   const AiItemAdvisorPage({super.key});
@@ -19,10 +21,11 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
   final _miles = TextEditingController();
   final _minutes = TextEditingController();
   final _images = ItemImageService();
+  final _localRecognition = LocalClassificationRecognitionService();
 
-  bool _enableSimulatedAi = false;
   bool _working = false;
   String? _imagePath;
+  String? _localModelStatus;
   ItemAnalysisResult? _result;
 
   @override
@@ -36,33 +39,42 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
   Future<void> _chooseImage() async {
     final path = await _images.chooseFromGallery();
     if (!mounted || path == null) return;
+
     setState(() {
       _imagePath = path;
       _result = null;
+      _localModelStatus = null;
     });
   }
 
   Future<void> _takePhoto() async {
     final path = await _images.takePhoto();
     if (!mounted || path == null) return;
+
     setState(() {
       _imagePath = path;
       _result = null;
+      _localModelStatus = null;
     });
   }
 
   Future<void> _removeImage() async {
     final current = _imagePath;
+
     setState(() {
       _imagePath = null;
       _result = null;
+      _localModelStatus = null;
     });
+
     await _images.deleteLocalImage(current);
   }
 
   Future<void> _analyze() async {
     final description = _description.text.trim();
-    if (description.isEmpty && _imagePath == null) {
+    final imagePath = _imagePath;
+
+    if (description.isEmpty && imagePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Add a photo or describe the item first.'),
@@ -70,27 +82,51 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
       );
       return;
     }
-    if (_working) return;
 
+    if (_working) return;
     setState(() => _working = true);
+
+    if (imagePath != null) {
+      final attempt = await _localRecognition.analyze(imagePath: imagePath);
+
+      if (!mounted) return;
+
+      setState(() => _localModelStatus = attempt.message);
+
+      if (attempt.result != null) {
+        setState(() => _working = false);
+
+        await Navigator.push<void>(
+          context,
+          MaterialPageRoute<void>(
+            builder: (_) => RecognitionReviewPage(
+              imagePath: imagePath,
+              result: attempt.result!,
+            ),
+          ),
+        );
+        return;
+      }
+    }
 
     final service = ItemAnalysisService(
       provider: const MockItemAnalysisProvider(),
-      allowAi: _enableSimulatedAi,
+      allowAi: false,
       allowNetwork: false,
-      allowImages: _enableSimulatedAi,
+      allowImages: false,
     );
 
     final result = await service.analyze(
       ItemAnalysisRequest(
         description: description,
-        imagePath: _imagePath,
+        imagePath: imagePath,
         roundTripMiles: double.tryParse(_miles.text.trim()),
         availableMinutes: int.tryParse(_minutes.text.trim()),
       ),
     );
 
     if (!mounted) return;
+
     setState(() {
       _result = result;
       _working = false;
@@ -114,8 +150,9 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
             child: const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'Photos are copied into Scrap Helper local storage. '
-                'Nothing is uploaded in this phase. Deterministic rules remain the default.',
+                'Scrap Helper first attempts a locally installed TFLite model. '
+                'When no compatible model is installed, it falls back to '
+                'deterministic text rules. Nothing is uploaded.',
               ),
             ),
           ),
@@ -127,6 +164,16 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
             onCamera: _takePhoto,
             onRemove: _removeImage,
           ),
+          if (_localModelStatus case final status?) ...[
+            const SizedBox(height: 8),
+            Card(
+              key: const Key('local_model_attempt_status'),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(status),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           TextField(
             key: const Key('ai_item_description'),
@@ -134,7 +181,7 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
             maxLines: 3,
             decoration: const InputDecoration(
               labelText: 'Describe the object',
-              hintText: 'Example: countertop microwave with intact power cord',
+              hintText: 'Optional when a local visual model is installed',
             ),
           ),
           const SizedBox(height: 8),
@@ -164,17 +211,9 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
             ],
           ),
           const SizedBox(height: 8),
-          SwitchListTile(
-            key: const Key('simulated_ai_switch'),
-            value: _enableSimulatedAi,
-            onChanged: (value) => setState(() => _enableSimulatedAi = value),
-            title: const Text('Use simulated visual AI'),
-            subtitle: const Text(
-              'Development-only provider. No image or text leaves this device.',
-            ),
-          ),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
               ActionChip(
                 label: const Text('Microwave example'),
@@ -182,14 +221,13 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
                     _loadExample('Countertop microwave with intact power cord'),
               ),
               ActionChip(
-                label: const Text('Dryer example'),
-                onPressed: () =>
-                    _loadExample('Full-size electric clothes dryer'),
+                label: const Text('Brass fitting example'),
+                onPressed: () => _loadExample('Yellow metal plumbing fitting'),
               ),
               ActionChip(
-                label: const Text('Refrigerator example'),
+                label: const Text('Copper tubing example'),
                 onPressed: () =>
-                    _loadExample('Older refrigerator with compressor attached'),
+                    _loadExample('Copper tubing with visible soldered joints'),
               ),
             ],
           ),
@@ -202,8 +240,8 @@ class _AiItemAdvisorPageState extends State<AiItemAdvisorPage> {
                     dimension: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.auto_awesome),
-            label: const Text('Analyze Item'),
+                : const Icon(Icons.memory),
+            label: const Text('Analyze Offline'),
           ),
           if (_result case final result?) ...[
             const SizedBox(height: 16),
@@ -325,40 +363,32 @@ class _AnalysisResultCard extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Text('$confidence% confidence • ${result.providerName}'),
-            if (result.usedImage)
-              const Text(
-                'Photo included in simulated analysis',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
             const SizedBox(height: 12),
-            _SectionTitle(
-              icon: Icons.recommend,
-              text: _recommendationLabel(result.recommendation),
+            Text(
+              _recommendationLabel(result.recommendation),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             Text(
-              '${result.estimatedProcessingMinutes} estimated processing min',
+              '${result.estimatedProcessingMinutes} '
+              'estimated processing min',
             ),
             const SizedBox(height: 12),
-            const _SectionTitle(
-              icon: Icons.recycling,
-              text: 'Likely materials',
+            Text(
+              'Likely materials',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             for (final material in result.materials)
               Text(
-                '• ${material.name}: ${(material.likelihood * 100).round()}%',
+                '• ${material.name}: '
+                '${(material.likelihood * 100).round()}%',
               ),
             const SizedBox(height: 12),
-            const _SectionTitle(icon: Icons.warning_amber, text: 'Hazards'),
+            Text('Hazards', style: Theme.of(context).textTheme.titleMedium),
             for (final hazard in result.hazards) Text('• $hazard'),
             const SizedBox(height: 12),
-            const _SectionTitle(icon: Icons.fact_check, text: 'Why'),
-            for (final reason in result.reasoning) Text('• $reason'),
-            const SizedBox(height: 12),
-            Text(
-              result.usedAi
-                  ? 'AI suggestion — review before acting.'
-                  : 'Deterministic estimate — no AI was used.',
-              style: const TextStyle(fontWeight: FontWeight.w700),
+            const Text(
+              'Deterministic estimate — no visual model result was used.',
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -373,23 +403,5 @@ class _AnalysisResultCard extends StatelessWidget {
       ItemActionRecommendation.inspectFirst => 'Recommendation: Inspect first',
       ItemActionRecommendation.skip => 'Recommendation: Skip',
     };
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20),
-        const SizedBox(width: 8),
-        Text(text, style: Theme.of(context).textTheme.titleMedium),
-      ],
-    );
   }
 }
