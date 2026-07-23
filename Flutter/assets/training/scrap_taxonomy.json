@@ -1,0 +1,81 @@
+{
+  "taxonomy_version": "1.0.0",
+  "families": [
+    {
+      "id": "copper",
+      "labels": [
+        "bare_bright_copper",
+        "number_one_copper",
+        "number_two_copper",
+        "copper_tubing_clean",
+        "copper_tubing_soldered",
+        "insulated_copper_wire"
+      ]
+    },
+    {
+      "id": "brass",
+      "labels": [
+        "yellow_brass",
+        "red_brass",
+        "dirty_brass",
+        "brass_fitting",
+        "brass_valve",
+        "brass_faucet"
+      ]
+    },
+    {
+      "id": "aluminum",
+      "labels": [
+        "clean_aluminum_extrusion",
+        "painted_aluminum_extrusion",
+        "cast_aluminum",
+        "sheet_aluminum",
+        "aluminum_wire",
+        "aluminum_copper_radiator"
+      ]
+    },
+    {
+      "id": "ferrous",
+      "labels": [
+        "shred_steel",
+        "cast_iron",
+        "stainless_candidate"
+      ]
+    },
+    {
+      "id": "components",
+      "labels": [
+        "electric_motor",
+        "transformer",
+        "compressor",
+        "alternator",
+        "starter",
+        "power_supply",
+        "circuit_board_low",
+        "circuit_board_high"
+      ]
+    },
+    {
+      "id": "whole_objects",
+      "labels": [
+        "microwave",
+        "washer",
+        "electric_dryer",
+        "dishwasher",
+        "stove_oven",
+        "water_heater",
+        "barbecue_grill",
+        "printer",
+        "desktop_computer",
+        "stereo_receiver"
+      ]
+    },
+    {
+      "id": "other",
+      "labels": [
+        "mixed_material",
+        "unknown_scrap"
+      ]
+    }
+  ]
+}
