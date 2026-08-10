@@ -1,0 +1,20 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - Backups/**
+    - Temp/**
+    - _archive/**
+    - .pack_*/**
+    - .pack35_download/**
+    - build/**
+    - .dart_tool/**
+    - "Scrappr Build Needs*/**"
+    - "Search Agent/**"
+    - "Flutter/**"
+    - "Tools/**"
+    - "Docs/**"
+    - ios/**
+    - macos/**
+    - linux/**
+    - web/**

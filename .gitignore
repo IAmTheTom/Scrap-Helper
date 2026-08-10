@@ -1,38 +1,52 @@
-# Operating system
-Thumbs.db
-Desktop.ini
-.DS_Store
+# Flutter / Dart generated
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
 
-# Editors
+# Local generated packs / archives
+.pack_*/
+.pack35_download/
+Backups/
+Temp/
+_archive/
+Scrappr Build Needs*/
+*.zip
+
+# Local scratch / old non-app folders
+Flutter/
+Search Agent/
+Tools/
+Docs/
+
+# Pack readmes / local notes
+README-Implementation-Pack-*.md
+README-Pack-*.md
+
+# Scripts from generated packs; add curated scripts later
+scripts/
+
+# Unsupported current targets
+ios/
+macos/
+linux/
+web/
+
+# Python / local envs
+**/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# IDE / OS
 .vscode/
 .idea/
 *.iml
+.DS_Store
+Thumbs.db
 
-# Temporary project folders
-Temp/
-Backups/
-Exports/
-Imports/
+# Logs
+*.log
 
-# Flutter / Dart
-Flutter/.dart_tool/
-Flutter/.flutter-plugins
-Flutter/.flutter-plugins-dependencies
-Flutter/.packages
-Flutter/build/
-Flutter/coverage/
-Flutter/android/.gradle/
-Flutter/android/local.properties
-Flutter/ios/Pods/
-Flutter/ios/.symlinks/
-Flutter/macos/Pods/
-Flutter/windows/flutter/ephemeral/
-Flutter/linux/flutter/ephemeral/
-Flutter/macos/Flutter/ephemeral/
-
-# Secrets and local environment
-.env
-.env.*
-*.keystore
-*.jks
-key.properties
+# Local Codex/planning notes
+Scrappr Build Needs*.md
