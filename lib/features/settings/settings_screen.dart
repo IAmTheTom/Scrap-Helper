@@ -1,0 +1,190 @@
+part of '../../main.dart';
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key, required this.model, required this.changed});
+  final ScrapprModel model;
+  final VoidCallback changed;
+  @override
+  Widget build(BuildContext context) => PageShell(
+    title: 'Settings',
+    child: ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        sectionTitle(
+          context,
+          'Vehicles',
+          action: TextButton.icon(
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => VehicleDialog(model: model, changed: changed),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Add'),
+          ),
+        ),
+        for (final vehicle in model.vehicles)
+          Card(
+            child: ListTile(
+              onTap: () => showDialog(
+                context: context,
+                builder: (_) => VehicleDialog(
+                  model: model,
+                  changed: changed,
+                  vehicle: vehicle,
+                ),
+              ),
+              title: Text(vehicle.name),
+              subtitle: Text(
+                '${vehicle.type}  -  ${vehicle.mpg} MPG  -  ${vehicle.cargoLength}x${vehicle.cargoWidth}x${vehicle.cargoHeight} in  -  ${vehicle.payloadLimit} lb\nLimits: ${vehicle.fullCargo} full cargo, ${vehicle.largeUpright} upright, ${vehicle.medium} medium  -  ${vehicle.notes}',
+              ),
+              isThreeLine: true,
+              trailing: IconButton(
+                onPressed: model.vehicles.length == 1
+                    ? null
+                    : () {
+                        model.vehicles.remove(vehicle);
+                        changed();
+                      },
+                icon: const Icon(Icons.delete_outline),
+              ),
+            ),
+          ),
+        sectionTitle(
+          context,
+          'Scrapyards',
+          action: TextButton.icon(
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => YardDialog(model: model, changed: changed),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Add'),
+          ),
+        ),
+        for (final yard in model.yards)
+          Card(
+            child: ExpansionTile(
+              title: Text(
+                '${yard.preferred ? 'Preferred:  ' : ''}${yard.name}',
+              ),
+              subtitle: Text(
+                '${yard.address}, ${yard.cityStateZip}\n${yard.phone}  -  ${yard.hours}',
+              ),
+              children: [
+                ListTile(
+                  title: const Text('Notes'),
+                  subtitle: Text(yard.notes),
+                ),
+                ...model.yardPrices
+                    .where((p) => p.yardId == yard.id)
+                    .map(
+                      (price) => ListTile(
+                        title: Text(price.material),
+                        subtitle: Text(
+                          '\$${price.price.toStringAsFixed(2)} ${price.unit}  -  updated ${price.updatedAt.toLocal().toString().split(' ').first}\n${price.notes}',
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            model.yardPrices.remove(price);
+                            changed();
+                          },
+                          icon: const Icon(Icons.delete_outline),
+                        ),
+                      ),
+                    ),
+                OverflowBar(
+                  children: [
+                    TextButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (_) => YardPriceDialog(
+                          model: model,
+                          changed: changed,
+                          yardId: yard.id,
+                        ),
+                      ),
+                      child: const Text('Add price'),
+                    ),
+                    TextButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (_) => YardDialog(
+                          model: model,
+                          changed: changed,
+                          yard: yard,
+                        ),
+                      ),
+                      child: const Text('Edit yard'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        model.yards.remove(yard);
+                        model.yardPrices.removeWhere(
+                          (p) => p.yardId == yard.id,
+                        );
+                        changed();
+                      },
+                      child: const Text('Delete'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        sectionTitle(
+          context,
+          'Search Rules',
+          action: TextButton.icon(
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => SearchRuleDialog(model: model, changed: changed),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Add'),
+          ),
+        ),
+        for (final rule in model.searchRules)
+          Card(
+            child: ListTile(
+              onTap: () => showDialog(
+                context: context,
+                builder: (_) => SearchRuleDialog(
+                  model: model,
+                  changed: changed,
+                  rule: rule,
+                ),
+              ),
+              title: Text(rule.name),
+              subtitle: Text(
+                '${rule.source}  -  ${rule.maxRadius} mi  -  ${rule.enabled ? 'Enabled' : 'Disabled'}  -  notify ${rule.notify ? 'yes' : 'no'}\nKeywords: ${rule.keywords}\nExclude: ${rule.excludedWords}',
+              ),
+              isThreeLine: true,
+              trailing: IconButton(
+                onPressed: () {
+                  model.searchRules.remove(rule);
+                  changed();
+                },
+                icon: const Icon(Icons.delete_outline),
+              ),
+            ),
+          ),
+        const Card(
+          child: ListTile(
+            leading: Icon(Icons.camera_alt_outlined),
+            title: Text('Camera & photos'),
+            subtitle: Text('Camera integration pending.'),
+          ),
+        ),
+        const Card(
+          child: ListTile(
+            leading: Icon(Icons.auto_awesome),
+            title: Text('AI assistant'),
+            subtitle: Text(
+              'No AI model is connected. Responses are deterministic/rule-engine placeholders.',
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
