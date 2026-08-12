@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path_util;
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +21,7 @@ part 'models/search_rule.dart';
 part 'models/search_source.dart';
 part 'models/notification_settings.dart';
 part 'models/home_base_settings.dart';
+part 'models/route_plan.dart';
 part 'models/object_template.dart';
 part 'models/scrap_item.dart';
 part 'models/run_plan.dart';

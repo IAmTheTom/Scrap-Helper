@@ -38,12 +38,12 @@ class RunsScreen extends StatelessWidget {
           runSpacing: 8,
           children: [
             FilledButton.tonalIcon(
-              onPressed: () => const RouteService().pending(context),
+              onPressed: () => const RouteService().showHandoff(context, model),
               icon: const Icon(Icons.map_outlined),
               label: const Text('Open in Maps'),
             ),
             FilledButton.tonalIcon(
-              onPressed: () => const RouteService().pending(context),
+              onPressed: () => pending(context, 'Route optimization pending.'),
               icon: const Icon(Icons.alt_route),
               label: const Text('Optimize route'),
             ),
