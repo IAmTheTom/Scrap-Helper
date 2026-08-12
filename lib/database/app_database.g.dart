@@ -6852,305 +6852,6 @@ class PhotoAttachmentsCompanion extends UpdateCompanion<PhotoAttachmentRow> {
   }
 }
 
-class $AssistantMessagesTable extends AssistantMessages
-    with TableInfo<$AssistantMessagesTable, AssistantMessageRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $AssistantMessagesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _roleMeta = const VerificationMeta('role');
-  @override
-  late final GeneratedColumn<String> role = GeneratedColumn<String>(
-    'role',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _messageMeta = const VerificationMeta(
-    'message',
-  );
-  @override
-  late final GeneratedColumn<String> message = GeneratedColumn<String>(
-    'message',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, role, message, createdAt];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'assistant_messages';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<AssistantMessageRow> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('role')) {
-      context.handle(
-        _roleMeta,
-        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_roleMeta);
-    }
-    if (data.containsKey('message')) {
-      context.handle(
-        _messageMeta,
-        message.isAcceptableOrUnknown(data['message']!, _messageMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_messageMeta);
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  AssistantMessageRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return AssistantMessageRow(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      role: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}role'],
-      )!,
-      message: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}message'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-    );
-  }
-
-  @override
-  $AssistantMessagesTable createAlias(String alias) {
-    return $AssistantMessagesTable(attachedDatabase, alias);
-  }
-}
-
-class AssistantMessageRow extends DataClass
-    implements Insertable<AssistantMessageRow> {
-  final int id;
-  final String role;
-  final String message;
-  final DateTime createdAt;
-  const AssistantMessageRow({
-    required this.id,
-    required this.role,
-    required this.message,
-    required this.createdAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['role'] = Variable<String>(role);
-    map['message'] = Variable<String>(message);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    return map;
-  }
-
-  AssistantMessagesCompanion toCompanion(bool nullToAbsent) {
-    return AssistantMessagesCompanion(
-      id: Value(id),
-      role: Value(role),
-      message: Value(message),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory AssistantMessageRow.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return AssistantMessageRow(
-      id: serializer.fromJson<int>(json['id']),
-      role: serializer.fromJson<String>(json['role']),
-      message: serializer.fromJson<String>(json['message']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'role': serializer.toJson<String>(role),
-      'message': serializer.toJson<String>(message),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  AssistantMessageRow copyWith({
-    int? id,
-    String? role,
-    String? message,
-    DateTime? createdAt,
-  }) => AssistantMessageRow(
-    id: id ?? this.id,
-    role: role ?? this.role,
-    message: message ?? this.message,
-    createdAt: createdAt ?? this.createdAt,
-  );
-  AssistantMessageRow copyWithCompanion(AssistantMessagesCompanion data) {
-    return AssistantMessageRow(
-      id: data.id.present ? data.id.value : this.id,
-      role: data.role.present ? data.role.value : this.role,
-      message: data.message.present ? data.message.value : this.message,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AssistantMessageRow(')
-          ..write('id: $id, ')
-          ..write('role: $role, ')
-          ..write('message: $message, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, role, message, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is AssistantMessageRow &&
-          other.id == this.id &&
-          other.role == this.role &&
-          other.message == this.message &&
-          other.createdAt == this.createdAt);
-}
-
-class AssistantMessagesCompanion extends UpdateCompanion<AssistantMessageRow> {
-  final Value<int> id;
-  final Value<String> role;
-  final Value<String> message;
-  final Value<DateTime> createdAt;
-  const AssistantMessagesCompanion({
-    this.id = const Value.absent(),
-    this.role = const Value.absent(),
-    this.message = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  AssistantMessagesCompanion.insert({
-    this.id = const Value.absent(),
-    required String role,
-    required String message,
-    required DateTime createdAt,
-  }) : role = Value(role),
-       message = Value(message),
-       createdAt = Value(createdAt);
-  static Insertable<AssistantMessageRow> custom({
-    Expression<int>? id,
-    Expression<String>? role,
-    Expression<String>? message,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (role != null) 'role': role,
-      if (message != null) 'message': message,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  AssistantMessagesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? role,
-    Value<String>? message,
-    Value<DateTime>? createdAt,
-  }) {
-    return AssistantMessagesCompanion(
-      id: id ?? this.id,
-      role: role ?? this.role,
-      message: message ?? this.message,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (role.present) {
-      map['role'] = Variable<String>(role.value);
-    }
-    if (message.present) {
-      map['message'] = Variable<String>(message.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AssistantMessagesCompanion(')
-          ..write('id: $id, ')
-          ..write('role: $role, ')
-          ..write('message: $message, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $AssistantContextsTable extends AssistantContexts
     with TableInfo<$AssistantContextsTable, AssistantContextRow> {
   @override
@@ -7657,6 +7358,361 @@ class AssistantContextsCompanion extends UpdateCompanion<AssistantContextRow> {
   }
 }
 
+class $AssistantMessagesTable extends AssistantMessages
+    with TableInfo<$AssistantMessagesTable, AssistantMessageRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssistantMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _contextIdMeta = const VerificationMeta(
+    'contextId',
+  );
+  @override
+  late final GeneratedColumn<int> contextId = GeneratedColumn<int>(
+    'context_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES assistant_contexts (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageMeta = const VerificationMeta(
+    'message',
+  );
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+    'message',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contextId,
+    role,
+    message,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'assistant_messages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AssistantMessageRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('context_id')) {
+      context.handle(
+        _contextIdMeta,
+        contextId.isAcceptableOrUnknown(data['context_id']!, _contextIdMeta),
+      );
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(
+        _messageMeta,
+        message.isAcceptableOrUnknown(data['message']!, _messageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messageMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AssistantMessageRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssistantMessageRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      contextId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}context_id'],
+      ),
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      message: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AssistantMessagesTable createAlias(String alias) {
+    return $AssistantMessagesTable(attachedDatabase, alias);
+  }
+}
+
+class AssistantMessageRow extends DataClass
+    implements Insertable<AssistantMessageRow> {
+  final int id;
+  final int? contextId;
+  final String role;
+  final String message;
+  final DateTime createdAt;
+  const AssistantMessageRow({
+    required this.id,
+    this.contextId,
+    required this.role,
+    required this.message,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || contextId != null) {
+      map['context_id'] = Variable<int>(contextId);
+    }
+    map['role'] = Variable<String>(role);
+    map['message'] = Variable<String>(message);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  AssistantMessagesCompanion toCompanion(bool nullToAbsent) {
+    return AssistantMessagesCompanion(
+      id: Value(id),
+      contextId: contextId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contextId),
+      role: Value(role),
+      message: Value(message),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AssistantMessageRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssistantMessageRow(
+      id: serializer.fromJson<int>(json['id']),
+      contextId: serializer.fromJson<int?>(json['contextId']),
+      role: serializer.fromJson<String>(json['role']),
+      message: serializer.fromJson<String>(json['message']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'contextId': serializer.toJson<int?>(contextId),
+      'role': serializer.toJson<String>(role),
+      'message': serializer.toJson<String>(message),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  AssistantMessageRow copyWith({
+    int? id,
+    Value<int?> contextId = const Value.absent(),
+    String? role,
+    String? message,
+    DateTime? createdAt,
+  }) => AssistantMessageRow(
+    id: id ?? this.id,
+    contextId: contextId.present ? contextId.value : this.contextId,
+    role: role ?? this.role,
+    message: message ?? this.message,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  AssistantMessageRow copyWithCompanion(AssistantMessagesCompanion data) {
+    return AssistantMessageRow(
+      id: data.id.present ? data.id.value : this.id,
+      contextId: data.contextId.present ? data.contextId.value : this.contextId,
+      role: data.role.present ? data.role.value : this.role,
+      message: data.message.present ? data.message.value : this.message,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssistantMessageRow(')
+          ..write('id: $id, ')
+          ..write('contextId: $contextId, ')
+          ..write('role: $role, ')
+          ..write('message: $message, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, contextId, role, message, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssistantMessageRow &&
+          other.id == this.id &&
+          other.contextId == this.contextId &&
+          other.role == this.role &&
+          other.message == this.message &&
+          other.createdAt == this.createdAt);
+}
+
+class AssistantMessagesCompanion extends UpdateCompanion<AssistantMessageRow> {
+  final Value<int> id;
+  final Value<int?> contextId;
+  final Value<String> role;
+  final Value<String> message;
+  final Value<DateTime> createdAt;
+  const AssistantMessagesCompanion({
+    this.id = const Value.absent(),
+    this.contextId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.message = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  AssistantMessagesCompanion.insert({
+    this.id = const Value.absent(),
+    this.contextId = const Value.absent(),
+    required String role,
+    required String message,
+    required DateTime createdAt,
+  }) : role = Value(role),
+       message = Value(message),
+       createdAt = Value(createdAt);
+  static Insertable<AssistantMessageRow> custom({
+    Expression<int>? id,
+    Expression<int>? contextId,
+    Expression<String>? role,
+    Expression<String>? message,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contextId != null) 'context_id': contextId,
+      if (role != null) 'role': role,
+      if (message != null) 'message': message,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  AssistantMessagesCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? contextId,
+    Value<String>? role,
+    Value<String>? message,
+    Value<DateTime>? createdAt,
+  }) {
+    return AssistantMessagesCompanion(
+      id: id ?? this.id,
+      contextId: contextId ?? this.contextId,
+      role: role ?? this.role,
+      message: message ?? this.message,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (contextId.present) {
+      map['context_id'] = Variable<int>(contextId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssistantMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('contextId: $contextId, ')
+          ..write('role: $role, ')
+          ..write('message: $message, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $HomeBaseSettingsTableTable extends HomeBaseSettingsTable
     with TableInfo<$HomeBaseSettingsTableTable, HomeBaseSettingsRow> {
   @override
@@ -8097,10 +8153,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PhotoAttachmentsTable photoAttachments = $PhotoAttachmentsTable(
     this,
   );
-  late final $AssistantMessagesTable assistantMessages =
-      $AssistantMessagesTable(this);
   late final $AssistantContextsTable assistantContexts =
       $AssistantContextsTable(this);
+  late final $AssistantMessagesTable assistantMessages =
+      $AssistantMessagesTable(this);
   late final $HomeBaseSettingsTableTable homeBaseSettingsTable =
       $HomeBaseSettingsTableTable(this);
   @override
@@ -8121,10 +8177,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     runPlanItems,
     receipts,
     photoAttachments,
-    assistantMessages,
     assistantContexts,
+    assistantMessages,
     homeBaseSettingsTable,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'assistant_contexts',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('assistant_messages', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$VehiclesTableCreateCompanionBuilder =
@@ -13278,194 +13344,6 @@ typedef $$PhotoAttachmentsTableProcessedTableManager =
       PhotoAttachmentRow,
       PrefetchHooks Function()
     >;
-typedef $$AssistantMessagesTableCreateCompanionBuilder =
-    AssistantMessagesCompanion Function({
-      Value<int> id,
-      required String role,
-      required String message,
-      required DateTime createdAt,
-    });
-typedef $$AssistantMessagesTableUpdateCompanionBuilder =
-    AssistantMessagesCompanion Function({
-      Value<int> id,
-      Value<String> role,
-      Value<String> message,
-      Value<DateTime> createdAt,
-    });
-
-class $$AssistantMessagesTableFilterComposer
-    extends Composer<_$AppDatabase, $AssistantMessagesTable> {
-  $$AssistantMessagesTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get role => $composableBuilder(
-    column: $table.role,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get message => $composableBuilder(
-    column: $table.message,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$AssistantMessagesTableOrderingComposer
-    extends Composer<_$AppDatabase, $AssistantMessagesTable> {
-  $$AssistantMessagesTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get role => $composableBuilder(
-    column: $table.role,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get message => $composableBuilder(
-    column: $table.message,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$AssistantMessagesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $AssistantMessagesTable> {
-  $$AssistantMessagesTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get role =>
-      $composableBuilder(column: $table.role, builder: (column) => column);
-
-  GeneratedColumn<String> get message =>
-      $composableBuilder(column: $table.message, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-}
-
-class $$AssistantMessagesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $AssistantMessagesTable,
-          AssistantMessageRow,
-          $$AssistantMessagesTableFilterComposer,
-          $$AssistantMessagesTableOrderingComposer,
-          $$AssistantMessagesTableAnnotationComposer,
-          $$AssistantMessagesTableCreateCompanionBuilder,
-          $$AssistantMessagesTableUpdateCompanionBuilder,
-          (
-            AssistantMessageRow,
-            BaseReferences<
-              _$AppDatabase,
-              $AssistantMessagesTable,
-              AssistantMessageRow
-            >,
-          ),
-          AssistantMessageRow,
-          PrefetchHooks Function()
-        > {
-  $$AssistantMessagesTableTableManager(
-    _$AppDatabase db,
-    $AssistantMessagesTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$AssistantMessagesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$AssistantMessagesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$AssistantMessagesTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> role = const Value.absent(),
-                Value<String> message = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-              }) => AssistantMessagesCompanion(
-                id: id,
-                role: role,
-                message: message,
-                createdAt: createdAt,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String role,
-                required String message,
-                required DateTime createdAt,
-              }) => AssistantMessagesCompanion.insert(
-                id: id,
-                role: role,
-                message: message,
-                createdAt: createdAt,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$AssistantMessagesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $AssistantMessagesTable,
-      AssistantMessageRow,
-      $$AssistantMessagesTableFilterComposer,
-      $$AssistantMessagesTableOrderingComposer,
-      $$AssistantMessagesTableAnnotationComposer,
-      $$AssistantMessagesTableCreateCompanionBuilder,
-      $$AssistantMessagesTableUpdateCompanionBuilder,
-      (
-        AssistantMessageRow,
-        BaseReferences<
-          _$AppDatabase,
-          $AssistantMessagesTable,
-          AssistantMessageRow
-        >,
-      ),
-      AssistantMessageRow,
-      PrefetchHooks Function()
-    >;
 typedef $$AssistantContextsTableCreateCompanionBuilder =
     AssistantContextsCompanion Function({
       Value<int> id,
@@ -13486,6 +13364,41 @@ typedef $$AssistantContextsTableUpdateCompanionBuilder =
       Value<String?> selectedYardId,
       Value<String?> selectedReceiptId,
     });
+
+final class $$AssistantContextsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AssistantContextsTable,
+          AssistantContextRow
+        > {
+  $$AssistantContextsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$AssistantMessagesTable, List<AssistantMessageRow>>
+  _assistantMessagesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.assistantMessages,
+        aliasName: 'assistant_contexts__id__assistant_messages__context_id',
+      );
+
+  $$AssistantMessagesTableProcessedTableManager get assistantMessagesRefs {
+    final manager = $$AssistantMessagesTableTableManager(
+      $_db,
+      $_db.assistantMessages,
+    ).filter((f) => f.contextId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _assistantMessagesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$AssistantContextsTableFilterComposer
     extends Composer<_$AppDatabase, $AssistantContextsTable> {
@@ -13530,6 +13443,31 @@ class $$AssistantContextsTableFilterComposer
     column: $table.selectedReceiptId,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> assistantMessagesRefs(
+    Expression<bool> Function($$AssistantMessagesTableFilterComposer f) f,
+  ) {
+    final $$AssistantMessagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assistantMessages,
+      getReferencedColumn: (t) => t.contextId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssistantMessagesTableFilterComposer(
+            $db: $db,
+            $table: $db.assistantMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$AssistantContextsTableOrderingComposer
@@ -13618,6 +13556,32 @@ class $$AssistantContextsTableAnnotationComposer
     column: $table.selectedReceiptId,
     builder: (column) => column,
   );
+
+  Expression<T> assistantMessagesRefs<T extends Object>(
+    Expression<T> Function($$AssistantMessagesTableAnnotationComposer a) f,
+  ) {
+    final $$AssistantMessagesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.assistantMessages,
+          getReferencedColumn: (t) => t.contextId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AssistantMessagesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.assistantMessages,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$AssistantContextsTableTableManager
@@ -13631,16 +13595,9 @@ class $$AssistantContextsTableTableManager
           $$AssistantContextsTableAnnotationComposer,
           $$AssistantContextsTableCreateCompanionBuilder,
           $$AssistantContextsTableUpdateCompanionBuilder,
-          (
-            AssistantContextRow,
-            BaseReferences<
-              _$AppDatabase,
-              $AssistantContextsTable,
-              AssistantContextRow
-            >,
-          ),
+          (AssistantContextRow, $$AssistantContextsTableReferences),
           AssistantContextRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool assistantMessagesRefs})
         > {
   $$AssistantContextsTableTableManager(
     _$AppDatabase db,
@@ -13695,9 +13652,45 @@ class $$AssistantContextsTableTableManager
                 selectedReceiptId: selectedReceiptId,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AssistantContextsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({assistantMessagesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (assistantMessagesRefs) db.assistantMessages,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (assistantMessagesRefs)
+                    await $_getPrefetchedData<
+                      AssistantContextRow,
+                      $AssistantContextsTable,
+                      AssistantMessageRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AssistantContextsTableReferences
+                          ._assistantMessagesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AssistantContextsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).assistantMessagesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.contextId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -13712,16 +13705,338 @@ typedef $$AssistantContextsTableProcessedTableManager =
       $$AssistantContextsTableAnnotationComposer,
       $$AssistantContextsTableCreateCompanionBuilder,
       $$AssistantContextsTableUpdateCompanionBuilder,
-      (
-        AssistantContextRow,
+      (AssistantContextRow, $$AssistantContextsTableReferences),
+      AssistantContextRow,
+      PrefetchHooks Function({bool assistantMessagesRefs})
+    >;
+typedef $$AssistantMessagesTableCreateCompanionBuilder =
+    AssistantMessagesCompanion Function({
+      Value<int> id,
+      Value<int?> contextId,
+      required String role,
+      required String message,
+      required DateTime createdAt,
+    });
+typedef $$AssistantMessagesTableUpdateCompanionBuilder =
+    AssistantMessagesCompanion Function({
+      Value<int> id,
+      Value<int?> contextId,
+      Value<String> role,
+      Value<String> message,
+      Value<DateTime> createdAt,
+    });
+
+final class $$AssistantMessagesTableReferences
+    extends
         BaseReferences<
           _$AppDatabase,
-          $AssistantContextsTable,
-          AssistantContextRow
-        >,
-      ),
-      AssistantContextRow,
-      PrefetchHooks Function()
+          $AssistantMessagesTable,
+          AssistantMessageRow
+        > {
+  $$AssistantMessagesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AssistantContextsTable _contextIdTable(_$AppDatabase db) => db
+      .assistantContexts
+      .createAlias('assistant_messages__context_id__assistant_contexts__id');
+
+  $$AssistantContextsTableProcessedTableManager? get contextId {
+    final $_column = $_itemColumn<int>('context_id');
+    if ($_column == null) return null;
+    final manager = $$AssistantContextsTableTableManager(
+      $_db,
+      $_db.assistantContexts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contextIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AssistantMessagesTableFilterComposer
+    extends Composer<_$AppDatabase, $AssistantMessagesTable> {
+  $$AssistantMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AssistantContextsTableFilterComposer get contextId {
+    final $$AssistantContextsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contextId,
+      referencedTable: $db.assistantContexts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssistantContextsTableFilterComposer(
+            $db: $db,
+            $table: $db.assistantContexts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssistantMessagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AssistantMessagesTable> {
+  $$AssistantMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AssistantContextsTableOrderingComposer get contextId {
+    final $$AssistantContextsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contextId,
+      referencedTable: $db.assistantContexts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssistantContextsTableOrderingComposer(
+            $db: $db,
+            $table: $db.assistantContexts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssistantMessagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AssistantMessagesTable> {
+  $$AssistantMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AssistantContextsTableAnnotationComposer get contextId {
+    final $$AssistantContextsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contextId,
+          referencedTable: $db.assistantContexts,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AssistantContextsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.assistantContexts,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AssistantMessagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AssistantMessagesTable,
+          AssistantMessageRow,
+          $$AssistantMessagesTableFilterComposer,
+          $$AssistantMessagesTableOrderingComposer,
+          $$AssistantMessagesTableAnnotationComposer,
+          $$AssistantMessagesTableCreateCompanionBuilder,
+          $$AssistantMessagesTableUpdateCompanionBuilder,
+          (AssistantMessageRow, $$AssistantMessagesTableReferences),
+          AssistantMessageRow,
+          PrefetchHooks Function({bool contextId})
+        > {
+  $$AssistantMessagesTableTableManager(
+    _$AppDatabase db,
+    $AssistantMessagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AssistantMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AssistantMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AssistantMessagesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> contextId = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String> message = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => AssistantMessagesCompanion(
+                id: id,
+                contextId: contextId,
+                role: role,
+                message: message,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> contextId = const Value.absent(),
+                required String role,
+                required String message,
+                required DateTime createdAt,
+              }) => AssistantMessagesCompanion.insert(
+                id: id,
+                contextId: contextId,
+                role: role,
+                message: message,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AssistantMessagesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({contextId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (contextId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.contextId,
+                                referencedTable:
+                                    $$AssistantMessagesTableReferences
+                                        ._contextIdTable(db),
+                                referencedColumn:
+                                    $$AssistantMessagesTableReferences
+                                        ._contextIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AssistantMessagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AssistantMessagesTable,
+      AssistantMessageRow,
+      $$AssistantMessagesTableFilterComposer,
+      $$AssistantMessagesTableOrderingComposer,
+      $$AssistantMessagesTableAnnotationComposer,
+      $$AssistantMessagesTableCreateCompanionBuilder,
+      $$AssistantMessagesTableUpdateCompanionBuilder,
+      (AssistantMessageRow, $$AssistantMessagesTableReferences),
+      AssistantMessageRow,
+      PrefetchHooks Function({bool contextId})
     >;
 typedef $$HomeBaseSettingsTableTableCreateCompanionBuilder =
     HomeBaseSettingsTableCompanion Function({
@@ -13998,10 +14313,10 @@ class $AppDatabaseManager {
       $$ReceiptsTableTableManager(_db, _db.receipts);
   $$PhotoAttachmentsTableTableManager get photoAttachments =>
       $$PhotoAttachmentsTableTableManager(_db, _db.photoAttachments);
-  $$AssistantMessagesTableTableManager get assistantMessages =>
-      $$AssistantMessagesTableTableManager(_db, _db.assistantMessages);
   $$AssistantContextsTableTableManager get assistantContexts =>
       $$AssistantContextsTableTableManager(_db, _db.assistantContexts);
+  $$AssistantMessagesTableTableManager get assistantMessages =>
+      $$AssistantMessagesTableTableManager(_db, _db.assistantMessages);
   $$HomeBaseSettingsTableTableTableManager get homeBaseSettingsTable =>
       $$HomeBaseSettingsTableTableTableManager(_db, _db.homeBaseSettingsTable);
 }

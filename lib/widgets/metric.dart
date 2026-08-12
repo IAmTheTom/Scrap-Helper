@@ -25,5 +25,8 @@ class Metric extends StatelessWidget {
 
 void openAssistant(BuildContext context, ScrapprModel model) => Navigator.push(
   context,
-  MaterialPageRoute(builder: (_) => AssistantScreen(model: model)),
+  MaterialPageRoute(
+    builder: (_) =>
+        AssistantScreen(model: model, service: model.assistantService!),
+  ),
 );

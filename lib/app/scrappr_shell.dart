@@ -17,6 +17,7 @@ class _ScrapprAppState extends State<ScrapprApp> {
 
   Future<void> _load() async {
     final loaded = await persistence.loadOrSeed();
+    loaded.assistantService = AssistantService(database);
     if (!mounted) return;
     setState(() => loadedModel = loaded);
   }

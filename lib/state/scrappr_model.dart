@@ -537,6 +537,7 @@ class ScrapprModel {
   final searchRules = <SearchRule>[];
   final searchSources = <SearchSource>[];
   final photos = <PhotoAttachment>[];
+  AssistantService? assistantService;
   final notificationSettings = NotificationSettings(
     notificationsEnabled: false,
     notifyNewMatches: true,

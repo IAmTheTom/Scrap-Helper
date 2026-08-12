@@ -199,6 +199,11 @@ class PhotoAttachments extends Table {
 @DataClassName('AssistantMessageRow')
 class AssistantMessages extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get contextId => integer().nullable().references(
+    AssistantContexts,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   TextColumn get role => text()();
   TextColumn get message => text()();
   DateTimeColumn get createdAt => dateTime()();

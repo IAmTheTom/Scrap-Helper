@@ -1,19 +1,46 @@
 part of '../main.dart';
 
+enum AssistantContextType {
+  general('general', 'General'),
+  currentRun('current_run', 'Current run'),
+  inboxItem('inbox_item', 'Inbox item'),
+  runItem('run_item', 'Run item'),
+  processingItem('processing_item', 'Processing item'),
+  objectTemplate('object_template', 'Object template'),
+  yard('yard', 'Yard'),
+  vehicle('vehicle', 'Vehicle'),
+  receipt('receipt', 'Receipt');
+
+  const AssistantContextType(this.storageValue, this.label);
+  final String storageValue;
+  final String label;
+
+  static AssistantContextType fromStorage(String value) => values.firstWhere(
+    (type) => type.storageValue == value,
+    orElse: () => AssistantContextType.general,
+  );
+}
+
 class AssistantContext {
-  const AssistantContext({
-    required this.currentScreen,
-    this.selectedItemId,
-    this.selectedTemplateId,
-    this.selectedRunId,
-    this.selectedYardId,
-    this.selectedReceiptId,
+  const AssistantContext({this.id, required this.type, this.ownerId});
+
+  final int? id;
+  final AssistantContextType type;
+  final String? ownerId;
+}
+
+class AssistantMessage {
+  const AssistantMessage({
+    required this.id,
+    required this.contextId,
+    required this.role,
+    required this.message,
+    required this.createdAt,
   });
 
-  final String currentScreen;
-  final String? selectedItemId;
-  final String? selectedTemplateId;
-  final String? selectedRunId;
-  final String? selectedYardId;
-  final String? selectedReceiptId;
+  final int id;
+  final int contextId;
+  final String role;
+  final String message;
+  final DateTime createdAt;
 }
