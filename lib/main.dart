@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path_util;
+import 'package:path_provider/path_provider.dart';
 
 import 'database/app_database.dart';
 import 'database/database_provider.dart';
@@ -23,6 +27,7 @@ part 'models/receipt.dart';
 part 'models/assistant_context.dart';
 part 'state/scrappr_model.dart';
 part 'services/camera_service.dart';
+part 'services/photo_attachment_service.dart';
 part 'services/assistant_service.dart';
 part 'services/route_service.dart';
 part 'services/persistence_service.dart';

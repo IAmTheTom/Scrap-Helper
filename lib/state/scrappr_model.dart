@@ -562,6 +562,11 @@ class ScrapprModel {
   ObjectTemplate template(String id) => templates.firstWhere((t) => t.id == id);
   SearchSource source(String id) =>
       searchSources.firstWhere((source) => source.id == id);
+  int photoCount(String ownerId, String ownerType) => photos
+      .where(
+        (photo) => photo.ownerId == ownerId && photo.ownerType == ownerType,
+      )
+      .length;
   String sourceSummary(SearchRule rule) => rule.sourceIds
       .where((id) => searchSources.any((source) => source.id == id))
       .map((id) => source(id).name)

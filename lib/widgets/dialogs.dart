@@ -816,6 +816,8 @@ class TemplateDialog extends StatefulWidget {
 }
 
 class _TemplateDialogState extends State<TemplateDialog> {
+  late final attachmentOwnerId =
+      widget.template?.id ?? 'obj${DateTime.now().microsecondsSinceEpoch}';
   late final name = TextEditingController(text: widget.template?.name ?? '');
   late final aliases = TextEditingController(
     text: widget.template?.aliases ?? '',
@@ -918,12 +920,18 @@ class _TemplateDialogState extends State<TemplateDialog> {
               ],
             ),
             OutlinedButton.icon(
-              onPressed: () => const CameraService().pending(
+              onPressed: () => CameraService().attach(
                 context,
-                'Object library reference',
+                model: widget.model,
+                changed: widget.changed,
+                ownerId: attachmentOwnerId,
+                ownerType: PhotoOwnerType.objectTemplate,
+                label: 'Object library reference',
               ),
               icon: const Icon(Icons.add_a_photo_outlined),
-              label: const Text('Add reference photo'),
+              label: Text(
+                'Reference photos (${widget.model.photoCount(attachmentOwnerId, PhotoOwnerType.objectTemplate)})',
+              ),
             ),
           ],
         ),
@@ -931,7 +939,21 @@ class _TemplateDialogState extends State<TemplateDialog> {
     ),
     actions: [
       TextButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () async {
+          if (widget.template == null) {
+            final service = PhotoAttachmentService();
+            final draftPhotos = service.listForOwner(
+              widget.model.photos,
+              ownerId: attachmentOwnerId,
+              ownerType: PhotoOwnerType.objectTemplate,
+            );
+            for (final photo in draftPhotos) {
+              await service.delete(widget.model.photos, photo);
+            }
+            if (draftPhotos.isNotEmpty) widget.changed();
+          }
+          if (context.mounted) Navigator.pop(context);
+        },
         child: const Text('Cancel'),
       ),
       FilledButton(
@@ -939,7 +961,7 @@ class _TemplateDialogState extends State<TemplateDialog> {
           final t =
               widget.template ??
               ObjectTemplate(
-                id: 'obj${DateTime.now().microsecondsSinceEpoch}',
+                id: attachmentOwnerId,
                 name: '',
                 aliases: '',
                 category: '',
@@ -991,6 +1013,7 @@ class ReceiptDialog extends StatefulWidget {
 
 class _ReceiptDialogState extends State<ReceiptDialog> {
   final amount = TextEditingController(), notes = TextEditingController();
+  final attachmentOwnerId = 'r${DateTime.now().microsecondsSinceEpoch}';
   late String yardId = widget.model.yards.first.id;
   @override
   Widget build(BuildContext context) => AlertDialog(
@@ -1009,22 +1032,43 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
         const SizedBox(height: 10),
         Fields(controllers: [(amount, 'Total payout'), (notes, 'Notes')]),
         OutlinedButton.icon(
-          onPressed: () => const CameraService().pending(context, 'Receipt'),
+          onPressed: () => CameraService().attach(
+            context,
+            model: widget.model,
+            changed: widget.changed,
+            ownerId: attachmentOwnerId,
+            ownerType: PhotoOwnerType.receipt,
+            label: 'Receipt',
+          ),
           icon: const Icon(Icons.add_a_photo_outlined),
-          label: const Text('Add receipt photo'),
+          label: Text(
+            'Receipt photos (${widget.model.photoCount(attachmentOwnerId, PhotoOwnerType.receipt)})',
+          ),
         ),
       ],
     ),
     actions: [
       TextButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () async {
+          final service = PhotoAttachmentService();
+          final draftPhotos = service.listForOwner(
+            widget.model.photos,
+            ownerId: attachmentOwnerId,
+            ownerType: PhotoOwnerType.receipt,
+          );
+          for (final photo in draftPhotos) {
+            await service.delete(widget.model.photos, photo);
+          }
+          if (draftPhotos.isNotEmpty) widget.changed();
+          if (context.mounted) Navigator.pop(context);
+        },
         child: const Text('Cancel'),
       ),
       FilledButton(
         onPressed: () {
           widget.model.receipts.add(
             Receipt(
-              id: 'r${DateTime.now().microsecondsSinceEpoch}',
+              id: attachmentOwnerId,
               yardId: yardId,
               amount: double.tryParse(amount.text) ?? 0,
               date: DateTime.now(),

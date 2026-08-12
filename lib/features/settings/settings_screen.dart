@@ -282,7 +282,9 @@ class SettingsScreen extends StatelessWidget {
           child: ListTile(
             leading: Icon(Icons.camera_alt_outlined),
             title: Text('Camera & photos'),
-            subtitle: Text('Camera integration pending.'),
+            subtitle: Text(
+              'Android camera capture and photo selection are available. Capture is unavailable on unsupported platforms.',
+            ),
           ),
         ),
         const Card(

@@ -70,12 +70,18 @@ class ProcessingScreen extends StatelessWidget {
                         runSpacing: 6,
                         children: [
                           TextButton.icon(
-                            onPressed: () => const CameraService().pending(
+                            onPressed: () => CameraService().attach(
                               context,
-                              'Processing',
+                              model: model,
+                              changed: changed,
+                              ownerId: item.id,
+                              ownerType: PhotoOwnerType.processingItem,
+                              label: 'Processing item',
                             ),
                             icon: const Icon(Icons.add_a_photo_outlined),
-                            label: const Text('Add photo'),
+                            label: Text(
+                              'Photos (${model.photoCount(item.id, PhotoOwnerType.processingItem)})',
+                            ),
                           ),
                           TextButton.icon(
                             onPressed: () => openAssistant(context, model),

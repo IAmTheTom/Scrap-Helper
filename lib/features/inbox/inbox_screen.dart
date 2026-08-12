@@ -89,10 +89,15 @@ class InboxScreen extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Inbox result photo',
-                        onPressed: () => const CameraService().pending(
+                        tooltip:
+                            'Inbox result photos (${model.photoCount(item.id, PhotoOwnerType.inboxItem)})',
+                        onPressed: () => CameraService().attach(
                           context,
-                          'Inbox result',
+                          model: model,
+                          changed: changed,
+                          ownerId: item.id,
+                          ownerType: PhotoOwnerType.inboxItem,
+                          label: 'Inbox result',
                         ),
                         icon: const Icon(Icons.add_a_photo_outlined),
                       ),

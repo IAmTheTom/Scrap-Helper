@@ -90,9 +90,16 @@ class RunsScreen extends StatelessWidget {
                     ItemDialog(model: model, changed: changed, item: item),
               ),
               leading: IconButton(
-                tooltip: 'Pickup photo',
-                onPressed: () =>
-                    const CameraService().pending(context, 'Run item pickup'),
+                tooltip:
+                    'Pickup photos (${model.photoCount(item.id, PhotoOwnerType.runItem)})',
+                onPressed: () => CameraService().attach(
+                  context,
+                  model: model,
+                  changed: changed,
+                  ownerId: item.id,
+                  ownerType: PhotoOwnerType.runItem,
+                  label: 'Run item pickup',
+                ),
                 icon: const Icon(Icons.add_a_photo_outlined),
               ),
               title: Text(item.title),

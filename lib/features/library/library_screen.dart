@@ -61,12 +61,18 @@ class LibraryScreen extends StatelessWidget {
                 OverflowBar(
                   children: [
                     TextButton.icon(
-                      onPressed: () => const CameraService().pending(
+                      onPressed: () => CameraService().attach(
                         context,
-                        'Object library reference',
+                        model: model,
+                        changed: changed,
+                        ownerId: template.id,
+                        ownerType: PhotoOwnerType.objectTemplate,
+                        label: 'Object library reference',
                       ),
                       icon: const Icon(Icons.add_a_photo_outlined),
-                      label: const Text('Reference photo'),
+                      label: Text(
+                        'Reference photos (${model.photoCount(template.id, PhotoOwnerType.objectTemplate)})',
+                      ),
                     ),
                     TextButton(
                       onPressed: () => showDialog(
@@ -80,7 +86,7 @@ class LibraryScreen extends StatelessWidget {
                       child: const Text('Edit'),
                     ),
                     TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final removedItemIds = model.items
                             .where((item) => item.templateId == template.id)
                             .map((item) => item.id)
@@ -89,6 +95,15 @@ class LibraryScreen extends StatelessWidget {
                           (item) => removedItemIds.contains(item.id),
                         );
                         model.run.itemIds.removeWhere(removedItemIds.contains);
+                        final service = PhotoAttachmentService();
+                        final photos = service.listForOwner(
+                          model.photos,
+                          ownerId: template.id,
+                          ownerType: PhotoOwnerType.objectTemplate,
+                        );
+                        for (final photo in photos) {
+                          await service.delete(model.photos, photo);
+                        }
                         model.templates.remove(template);
                         changed();
                       },

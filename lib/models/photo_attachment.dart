@@ -15,9 +15,9 @@ class PhotoAttachment {
   final String id;
   final String ownerId;
   final String ownerType;
-  final String? localPath;
-  final String caption;
+  String? localPath;
+  String caption;
   final DateTime createdAt;
-  final String? hash;
-  final String? ocrText;
+  String? hash;
+  String? ocrText;
 }

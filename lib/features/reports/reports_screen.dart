@@ -45,8 +45,16 @@ class ReportsScreen extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: IconButton(
-                  onPressed: () =>
-                      const CameraService().pending(context, 'Receipt'),
+                  tooltip:
+                      'Receipt photos (${model.photoCount(receipt.id, PhotoOwnerType.receipt)})',
+                  onPressed: () => CameraService().attach(
+                    context,
+                    model: model,
+                    changed: changed,
+                    ownerId: receipt.id,
+                    ownerType: PhotoOwnerType.receipt,
+                    label: 'Receipt',
+                  ),
                   icon: const Icon(Icons.add_a_photo_outlined),
                 ),
                 title: Text('\$${receipt.amount.toStringAsFixed(2)}'),
