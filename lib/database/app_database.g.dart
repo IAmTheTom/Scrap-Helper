@@ -4714,6 +4714,17 @@ class $ScrapItemsTable extends ScrapItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _sourceUrlMeta = const VerificationMeta(
+    'sourceUrl',
+  );
+  @override
+  late final GeneratedColumn<String> sourceUrl = GeneratedColumn<String>(
+    'source_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _ruleMatchMeta = const VerificationMeta(
     'ruleMatch',
   );
@@ -4753,6 +4764,7 @@ class $ScrapItemsTable extends ScrapItems
     notes,
     source,
     sourceId,
+    sourceUrl,
     ruleMatch,
     duplicateWarning,
   ];
@@ -4868,6 +4880,12 @@ class $ScrapItemsTable extends ScrapItems
         sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
       );
     }
+    if (data.containsKey('source_url')) {
+      context.handle(
+        _sourceUrlMeta,
+        sourceUrl.isAcceptableOrUnknown(data['source_url']!, _sourceUrlMeta),
+      );
+    }
     if (data.containsKey('rule_match')) {
       context.handle(
         _ruleMatchMeta,
@@ -4944,6 +4962,10 @@ class $ScrapItemsTable extends ScrapItems
         DriftSqlType.string,
         data['${effectivePrefix}source_id'],
       ),
+      sourceUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_url'],
+      ),
       ruleMatch: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}rule_match'],
@@ -4974,6 +4996,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
   final String notes;
   final String source;
   final String? sourceId;
+  final String? sourceUrl;
   final String ruleMatch;
   final bool duplicateWarning;
   const ScrapItemRow({
@@ -4989,6 +5012,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
     required this.notes,
     required this.source,
     this.sourceId,
+    this.sourceUrl,
     required this.ruleMatch,
     required this.duplicateWarning,
   });
@@ -5008,6 +5032,9 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || sourceId != null) {
       map['source_id'] = Variable<String>(sourceId);
+    }
+    if (!nullToAbsent || sourceUrl != null) {
+      map['source_url'] = Variable<String>(sourceUrl);
     }
     map['rule_match'] = Variable<String>(ruleMatch);
     map['duplicate_warning'] = Variable<bool>(duplicateWarning);
@@ -5030,6 +5057,9 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
       sourceId: sourceId == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceId),
+      sourceUrl: sourceUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceUrl),
       ruleMatch: Value(ruleMatch),
       duplicateWarning: Value(duplicateWarning),
     );
@@ -5053,6 +5083,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
       notes: serializer.fromJson<String>(json['notes']),
       source: serializer.fromJson<String>(json['source']),
       sourceId: serializer.fromJson<String?>(json['sourceId']),
+      sourceUrl: serializer.fromJson<String?>(json['sourceUrl']),
       ruleMatch: serializer.fromJson<String>(json['ruleMatch']),
       duplicateWarning: serializer.fromJson<bool>(json['duplicateWarning']),
     );
@@ -5073,6 +5104,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
       'notes': serializer.toJson<String>(notes),
       'source': serializer.toJson<String>(source),
       'sourceId': serializer.toJson<String?>(sourceId),
+      'sourceUrl': serializer.toJson<String?>(sourceUrl),
       'ruleMatch': serializer.toJson<String>(ruleMatch),
       'duplicateWarning': serializer.toJson<bool>(duplicateWarning),
     };
@@ -5091,6 +5123,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
     String? notes,
     String? source,
     Value<String?> sourceId = const Value.absent(),
+    Value<String?> sourceUrl = const Value.absent(),
     String? ruleMatch,
     bool? duplicateWarning,
   }) => ScrapItemRow(
@@ -5106,6 +5139,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
     notes: notes ?? this.notes,
     source: source ?? this.source,
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
+    sourceUrl: sourceUrl.present ? sourceUrl.value : this.sourceUrl,
     ruleMatch: ruleMatch ?? this.ruleMatch,
     duplicateWarning: duplicateWarning ?? this.duplicateWarning,
   );
@@ -5133,6 +5167,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
       notes: data.notes.present ? data.notes.value : this.notes,
       source: data.source.present ? data.source.value : this.source,
       sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
       ruleMatch: data.ruleMatch.present ? data.ruleMatch.value : this.ruleMatch,
       duplicateWarning: data.duplicateWarning.present
           ? data.duplicateWarning.value
@@ -5155,6 +5190,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
           ..write('notes: $notes, ')
           ..write('source: $source, ')
           ..write('sourceId: $sourceId, ')
+          ..write('sourceUrl: $sourceUrl, ')
           ..write('ruleMatch: $ruleMatch, ')
           ..write('duplicateWarning: $duplicateWarning')
           ..write(')'))
@@ -5175,6 +5211,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
     notes,
     source,
     sourceId,
+    sourceUrl,
     ruleMatch,
     duplicateWarning,
   );
@@ -5194,6 +5231,7 @@ class ScrapItemRow extends DataClass implements Insertable<ScrapItemRow> {
           other.notes == this.notes &&
           other.source == this.source &&
           other.sourceId == this.sourceId &&
+          other.sourceUrl == this.sourceUrl &&
           other.ruleMatch == this.ruleMatch &&
           other.duplicateWarning == this.duplicateWarning);
 }
@@ -5211,6 +5249,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
   final Value<String> notes;
   final Value<String> source;
   final Value<String?> sourceId;
+  final Value<String?> sourceUrl;
   final Value<String> ruleMatch;
   final Value<bool> duplicateWarning;
   final Value<int> rowid;
@@ -5227,6 +5266,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
     this.notes = const Value.absent(),
     this.source = const Value.absent(),
     this.sourceId = const Value.absent(),
+    this.sourceUrl = const Value.absent(),
     this.ruleMatch = const Value.absent(),
     this.duplicateWarning = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -5244,6 +5284,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
     required String notes,
     required String source,
     this.sourceId = const Value.absent(),
+    this.sourceUrl = const Value.absent(),
     required String ruleMatch,
     required bool duplicateWarning,
     this.rowid = const Value.absent(),
@@ -5273,6 +5314,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
     Expression<String>? notes,
     Expression<String>? source,
     Expression<String>? sourceId,
+    Expression<String>? sourceUrl,
     Expression<String>? ruleMatch,
     Expression<bool>? duplicateWarning,
     Expression<int>? rowid,
@@ -5290,6 +5332,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
       if (notes != null) 'notes': notes,
       if (source != null) 'source': source,
       if (sourceId != null) 'source_id': sourceId,
+      if (sourceUrl != null) 'source_url': sourceUrl,
       if (ruleMatch != null) 'rule_match': ruleMatch,
       if (duplicateWarning != null) 'duplicate_warning': duplicateWarning,
       if (rowid != null) 'rowid': rowid,
@@ -5309,6 +5352,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
     Value<String>? notes,
     Value<String>? source,
     Value<String?>? sourceId,
+    Value<String?>? sourceUrl,
     Value<String>? ruleMatch,
     Value<bool>? duplicateWarning,
     Value<int>? rowid,
@@ -5326,6 +5370,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
       notes: notes ?? this.notes,
       source: source ?? this.source,
       sourceId: sourceId ?? this.sourceId,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
       ruleMatch: ruleMatch ?? this.ruleMatch,
       duplicateWarning: duplicateWarning ?? this.duplicateWarning,
       rowid: rowid ?? this.rowid,
@@ -5371,6 +5416,9 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
     if (sourceId.present) {
       map['source_id'] = Variable<String>(sourceId.value);
     }
+    if (sourceUrl.present) {
+      map['source_url'] = Variable<String>(sourceUrl.value);
+    }
     if (ruleMatch.present) {
       map['rule_match'] = Variable<String>(ruleMatch.value);
     }
@@ -5398,6 +5446,7 @@ class ScrapItemsCompanion extends UpdateCompanion<ScrapItemRow> {
           ..write('notes: $notes, ')
           ..write('source: $source, ')
           ..write('sourceId: $sourceId, ')
+          ..write('sourceUrl: $sourceUrl, ')
           ..write('ruleMatch: $ruleMatch, ')
           ..write('duplicateWarning: $duplicateWarning, ')
           ..write('rowid: $rowid')
@@ -11425,6 +11474,7 @@ typedef $$ScrapItemsTableCreateCompanionBuilder =
       required String notes,
       required String source,
       Value<String?> sourceId,
+      Value<String?> sourceUrl,
       required String ruleMatch,
       required bool duplicateWarning,
       Value<int> rowid,
@@ -11443,6 +11493,7 @@ typedef $$ScrapItemsTableUpdateCompanionBuilder =
       Value<String> notes,
       Value<String> source,
       Value<String?> sourceId,
+      Value<String?> sourceUrl,
       Value<String> ruleMatch,
       Value<bool> duplicateWarning,
       Value<int> rowid,
@@ -11550,6 +11601,11 @@ class $$ScrapItemsTableFilterComposer
 
   ColumnFilters<String> get sourceId => $composableBuilder(
     column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceUrl => $composableBuilder(
+    column: $table.sourceUrl,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11676,6 +11732,11 @@ class $$ScrapItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sourceUrl => $composableBuilder(
+    column: $table.sourceUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get ruleMatch => $composableBuilder(
     column: $table.ruleMatch,
     builder: (column) => ColumnOrderings(column),
@@ -11759,6 +11820,9 @@ class $$ScrapItemsTableAnnotationComposer
 
   GeneratedColumn<String> get sourceId =>
       $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceUrl =>
+      $composableBuilder(column: $table.sourceUrl, builder: (column) => column);
 
   GeneratedColumn<String> get ruleMatch =>
       $composableBuilder(column: $table.ruleMatch, builder: (column) => column);
@@ -11857,6 +11921,7 @@ class $$ScrapItemsTableTableManager
                 Value<String> notes = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> sourceId = const Value.absent(),
+                Value<String?> sourceUrl = const Value.absent(),
                 Value<String> ruleMatch = const Value.absent(),
                 Value<bool> duplicateWarning = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -11873,6 +11938,7 @@ class $$ScrapItemsTableTableManager
                 notes: notes,
                 source: source,
                 sourceId: sourceId,
+                sourceUrl: sourceUrl,
                 ruleMatch: ruleMatch,
                 duplicateWarning: duplicateWarning,
                 rowid: rowid,
@@ -11891,6 +11957,7 @@ class $$ScrapItemsTableTableManager
                 required String notes,
                 required String source,
                 Value<String?> sourceId = const Value.absent(),
+                Value<String?> sourceUrl = const Value.absent(),
                 required String ruleMatch,
                 required bool duplicateWarning,
                 Value<int> rowid = const Value.absent(),
@@ -11907,6 +11974,7 @@ class $$ScrapItemsTableTableManager
                 notes: notes,
                 source: source,
                 sourceId: sourceId,
+                sourceUrl: sourceUrl,
                 ruleMatch: ruleMatch,
                 duplicateWarning: duplicateWarning,
                 rowid: rowid,

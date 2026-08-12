@@ -27,6 +27,9 @@ class _ItemDialogState extends State<ItemDialog> {
     text: widget.item?.timeWindow ?? 'Contact seller',
   );
   late final notes = TextEditingController(text: widget.item?.notes ?? '');
+  late final sourceUrl = TextEditingController(
+    text: widget.item?.sourceUrl ?? '',
+  );
   late String templateId =
       widget.item?.templateId ?? widget.model.templates.first.id;
   late Destination destination = widget.item?.destination ?? Destination.home;
@@ -47,6 +50,7 @@ class _ItemDialogState extends State<ItemDialog> {
                 (miles, 'Estimated miles from home'),
                 (window, 'Pickup time window'),
                 (notes, 'Notes'),
+                (sourceUrl, 'Source listing URL (optional)'),
               ],
             ),
             DropdownButtonFormField<String>(
@@ -123,6 +127,9 @@ class _ItemDialogState extends State<ItemDialog> {
           item.destination = destination;
           item.status = status;
           item.notes = notes.text;
+          item.sourceUrl = sourceUrl.text.trim().isEmpty
+              ? null
+              : sourceUrl.text.trim();
           if (widget.item == null) {
             widget.model.items.add(item);
             widget.model.run.itemIds.add(item.id);
@@ -420,15 +427,38 @@ class _YardPriceDialogState extends State<YardPriceDialog> {
       price = TextEditingController(),
       unit = TextEditingController(text: r'$/lb'),
       notes = TextEditingController();
+  String selectedMaterial = '__new__';
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: const Text('Add Yard Price'),
-    content: Fields(
-      controllers: [
-        (material, 'Material name'),
-        (price, 'Price'),
-        (unit, 'Unit'),
-        (notes, 'Notes'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        DropdownButtonFormField<String>(
+          initialValue: selectedMaterial,
+          decoration: const InputDecoration(labelText: 'Known material'),
+          items: [
+            const DropdownMenuItem(
+              value: '__new__',
+              child: Text('NEW - custom material'),
+            ),
+            for (final value in yardPriceMaterialOptions(widget.model).skip(1))
+              DropdownMenuItem(value: value, child: Text(value)),
+          ],
+          onChanged: (value) => setState(() {
+            selectedMaterial = value ?? '__new__';
+            if (selectedMaterial != '__new__') material.text = selectedMaterial;
+          }),
+        ),
+        const SizedBox(height: 10),
+        Fields(
+          controllers: [
+            (material, 'Material name'),
+            (price, 'Price'),
+            (unit, 'Unit'),
+            (notes, 'Notes'),
+          ],
+        ),
       ],
     ),
     actions: [
@@ -457,6 +487,11 @@ class _YardPriceDialogState extends State<YardPriceDialog> {
     ],
   );
 }
+
+List<String> yardPriceMaterialOptions(ScrapprModel model) => [
+  'NEW',
+  ...model.knownMaterials,
+];
 
 class SearchRuleDialog extends StatefulWidget {
   const SearchRuleDialog({
@@ -580,11 +615,13 @@ class _SearchRuleDialogState extends State<SearchRuleDialog> {
 class SearchSourceDialog extends StatefulWidget {
   const SearchSourceDialog({
     super.key,
-    required this.source,
+    required this.model,
+    this.source,
     required this.changed,
   });
 
-  final SearchSource source;
+  final ScrapprModel model;
+  final SearchSource? source;
   final VoidCallback changed;
 
   @override
@@ -592,18 +629,58 @@ class SearchSourceDialog extends StatefulWidget {
 }
 
 class _SearchSourceDialogState extends State<SearchSourceDialog> {
-  late final radius = TextEditingController(
-    text: '${widget.source.defaultRadius}',
+  late final name = TextEditingController(text: widget.source?.name ?? '');
+  late final type = TextEditingController(
+    text: widget.source?.type ?? 'Manual',
   );
-  late final notes = TextEditingController(text: widget.source.notes);
+  late final radius = TextEditingController(
+    text: '${widget.source?.defaultRadius ?? 25}',
+  );
+  late final notes = TextEditingController(
+    text:
+        widget.source?.notes ??
+        'Manual/configuration only; integration pending.',
+  );
+  late bool enabled = widget.source?.enabled ?? true;
+  late bool direct = widget.source?.supportsDirectLink ?? true;
+  late bool notifications = widget.source?.supportsNotifications ?? false;
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text('Edit ${widget.source.name}'),
+    title: Text(
+      widget.source == null
+          ? 'Add Search Source'
+          : 'Edit ${widget.source!.name}',
+    ),
     content: SizedBox(
       width: 480,
-      child: Fields(
-        controllers: [(radius, 'Default radius (miles)'), (notes, 'Notes')],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Fields(
+            controllers: [
+              (name, 'Name'),
+              (type, 'Type / category'),
+              (radius, 'Default radius (miles)'),
+              (notes, 'Notes'),
+            ],
+          ),
+          SwitchListTile(
+            title: const Text('Enabled'),
+            value: enabled,
+            onChanged: (v) => setState(() => enabled = v),
+          ),
+          SwitchListTile(
+            title: const Text('Direct links supported'),
+            value: direct,
+            onChanged: (v) => setState(() => direct = v),
+          ),
+          SwitchListTile(
+            title: const Text('Notifications supported'),
+            value: notifications,
+            onChanged: (v) => setState(() => notifications = v),
+          ),
+        ],
       ),
     ),
     actions: [
@@ -613,9 +690,28 @@ class _SearchSourceDialogState extends State<SearchSourceDialog> {
       ),
       FilledButton(
         onPressed: () {
-          widget.source.defaultRadius =
-              double.tryParse(radius.text) ?? widget.source.defaultRadius;
-          widget.source.notes = notes.text.trim();
+          final source =
+              widget.source ??
+              SearchSource(
+                id: 'source${DateTime.now().microsecondsSinceEpoch}',
+                name: '',
+                type: '',
+                enabled: true,
+                defaultRadius: 25,
+                supportsDirectLink: true,
+                supportsManualEntry: true,
+                supportsNotifications: false,
+                notes: '',
+              );
+          source.name = name.text.trim();
+          source.type = type.text.trim();
+          source.defaultRadius =
+              double.tryParse(radius.text) ?? source.defaultRadius;
+          source.notes = notes.text.trim();
+          source.enabled = enabled;
+          source.supportsDirectLink = direct;
+          source.supportsNotifications = notifications;
+          if (widget.source == null) widget.model.searchSources.add(source);
           widget.changed();
           Navigator.pop(context);
         },

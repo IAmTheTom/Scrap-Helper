@@ -14,11 +14,12 @@ class ScrapItem {
     required this.notes,
     required this.source,
     this.sourceId,
+    this.sourceUrl,
     this.ruleMatch = 'Manual item',
     this.duplicateWarning = false,
   });
   final String id;
-  String? sourceId;
+  String? sourceId, sourceUrl;
   String title,
       templateId,
       pickupAddress,

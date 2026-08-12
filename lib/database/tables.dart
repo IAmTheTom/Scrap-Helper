@@ -141,6 +141,7 @@ class ScrapItems extends Table {
   TextColumn get notes => text()();
   TextColumn get source => text()();
   TextColumn get sourceId => text().nullable()();
+  TextColumn get sourceUrl => text().nullable()();
   TextColumn get ruleMatch => text()();
   BoolColumn get duplicateWarning => boolean()();
 

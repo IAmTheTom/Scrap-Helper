@@ -14,12 +14,12 @@ class SearchSource {
   });
 
   final String id;
-  final String name;
-  final String type;
+  String name;
+  String type;
   bool enabled;
   double defaultRadius;
-  final bool supportsDirectLink;
-  final bool supportsManualEntry;
-  final bool supportsNotifications;
+  bool supportsDirectLink;
+  bool supportsManualEntry;
+  bool supportsNotifications;
   String notes;
 }

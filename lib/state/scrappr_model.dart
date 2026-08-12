@@ -360,6 +360,7 @@ class ScrapprModel {
         notes: 'Conservative local placeholder; never scrap damaged cells.',
       ),
     ]);
+    templates.addAll(_seedMaterialTemplates());
     items.addAll([
       ScrapItem(
         id: 'l1',
@@ -625,6 +626,14 @@ class ScrapprModel {
       runItems.where((i) => i.destination == Destination.yard).length;
   double get totalPayout =>
       receipts.fold(0.0, (sum, receipt) => sum + receipt.amount);
+  List<String> get knownMaterials => {
+    for (final template in templates)
+      ...template.recoverableMaterials
+          .split(',')
+          .map((value) => value.trim())
+          .where((value) => value.isNotEmpty),
+    for (final price in yardPrices) price.material.trim(),
+  }.toList()..sort();
   void refreshSearch() {
     final id = DateTime.now().microsecondsSinceEpoch.toString();
     final enabledRule = searchRules.where((rule) => rule.enabled).firstOrNull;
@@ -654,4 +663,45 @@ class ScrapprModel {
     );
     lastRefresh = DateTime.now();
   }
+}
+
+List<ObjectTemplate> _seedMaterialTemplates() {
+  const materials = [
+    ('bare-bright-copper', 'Bare bright copper', 'Copper'),
+    ('number-1-copper', '#1 copper', 'Copper'),
+    ('number-2-copper', '#2 copper', 'Copper'),
+    ('insulated-copper-wire', 'Insulated copper wire', 'Wire'),
+    ('low-grade-wire', 'Low-grade wire', 'Wire'),
+    ('brass-material', 'Brass', 'Brass'),
+    ('aluminum-material', 'Aluminum', 'Aluminum'),
+    ('stainless-steel-material', 'Stainless steel', 'Steel'),
+    ('electric-motors-material', 'Electric motors', 'Motors'),
+    ('transformers-material', 'Transformers', 'Electronics'),
+    ('circuit-boards-material', 'Circuit boards', 'Electronics'),
+    ('power-supplies-material', 'Power supplies', 'Electronics'),
+    ('mixed-electronics-material', 'Mixed small electronics', 'Electronics'),
+  ];
+  return [
+    for (final material in materials)
+      ObjectTemplate(
+        id: material.$1,
+        name: material.$2,
+        aliases: '',
+        category: material.$3,
+        cargoDemand: CargoDemand.small,
+        destination: Destination.yard,
+        lowValue: 0,
+        likelyValue: 0,
+        highValue: 0,
+        stripMinutes: 0,
+        stripDifficulty: 1,
+        safetyNotes: 'Sort safely and verify the yard category before sale.',
+        toolsNeeded: 'Gloves, scale',
+        recoverableMaterials: material.$2,
+        partOutNotes:
+            'Material category; value depends on weight and yard grade.',
+        notes:
+            'Seeded material reference. Yard prices are not automatic valuation.',
+      ),
+  ];
 }

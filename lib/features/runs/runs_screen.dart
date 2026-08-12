@@ -43,29 +43,42 @@ class RunsScreen extends StatelessWidget {
               label: const Text('Open in Maps'),
             ),
             FilledButton.tonalIcon(
-              onPressed: () => pending(context, 'Route optimization pending.'),
+              onPressed: null,
               icon: const Icon(Icons.alt_route),
-              label: const Text('Optimize route'),
+              label: const Text('Optimize route (pending)'),
             ),
             FilledButton.tonalIcon(
-              onPressed: () => pending(context, 'Run splitting pending.'),
+              onPressed: null,
               icon: const Icon(Icons.call_split),
-              label: const Text('Split run'),
+              label: const Text('Split run (pending)'),
             ),
             OutlinedButton(
-              onPressed: () => openAssistant(context, model),
+              onPressed: () => openAssistant(
+                context,
+                model,
+                prompt: 'Why is this run rated this way?',
+              ),
               child: const Text('Why?'),
             ),
             OutlinedButton(
-              onPressed: () => openAssistant(context, model),
+              onPressed: () =>
+                  openAssistant(context, model, prompt: 'What should I strip?'),
               child: const Text('What should I strip?'),
             ),
             OutlinedButton(
-              onPressed: () => openAssistant(context, model),
+              onPressed: () => openAssistant(
+                context,
+                model,
+                prompt: 'What safety concerns should I review?',
+              ),
               child: const Text('Safety concerns'),
             ),
             OutlinedButton(
-              onPressed: () => openAssistant(context, model),
+              onPressed: () => openAssistant(
+                context,
+                model,
+                prompt: 'Which items should go home or to the yard?',
+              ),
               child: const Text('Home or yard?'),
             ),
           ],

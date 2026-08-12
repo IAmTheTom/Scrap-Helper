@@ -10,15 +10,6 @@ class SettingsScreen extends StatelessWidget {
     child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Card(
-          child: ListTile(
-            leading: Icon(Icons.storage_outlined),
-            title: Text('SQLite persistence active'),
-            subtitle: Text(
-              'Restart check: edit a vehicle note, add a receipt and object template, close Scrappr, then relaunch and verify them here.',
-            ),
-          ),
-        ),
         sectionTitle(
           context,
           'Home Base',
@@ -185,7 +176,19 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
-        sectionTitle(context, 'Search Sources'),
+        sectionTitle(
+          context,
+          'Search Sources',
+          action: TextButton.icon(
+            onPressed: () => showDialog<void>(
+              context: context,
+              builder: (_) =>
+                  SearchSourceDialog(model: model, changed: changed),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Add'),
+          ),
+        ),
         const Card(
           child: ListTile(
             leading: Icon(Icons.info_outline),
@@ -224,11 +227,25 @@ class SettingsScreen extends StatelessWidget {
                   trailing: TextButton(
                     onPressed: () => showDialog<void>(
                       context: context,
-                      builder: (_) =>
-                          SearchSourceDialog(source: source, changed: changed),
+                      builder: (_) => SearchSourceDialog(
+                        model: model,
+                        source: source,
+                        changed: changed,
+                      ),
                     ),
                     child: const Text('Edit'),
                   ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    model.searchSources.remove(source);
+                    for (final rule in model.searchRules) {
+                      rule.sourceIds.remove(source.id);
+                    }
+                    changed();
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete source'),
                 ),
               ],
             ),

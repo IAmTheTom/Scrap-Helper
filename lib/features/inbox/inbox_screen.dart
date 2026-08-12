@@ -146,10 +146,8 @@ class InboxScreen extends StatelessWidget {
                         child: const Text('Ignore'),
                       ),
                       TextButton(
-                        onPressed: () => pending(
-                          context,
-                          'Opening source listings is not connected yet.',
-                        ),
+                        onPressed: () => const ExternalLinkService()
+                            .openSourceListing(context, item),
                         child: const Text('Open source listing'),
                       ),
                     ],

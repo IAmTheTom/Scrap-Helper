@@ -45,6 +45,25 @@ class LibraryScreen extends StatelessWidget {
                   ),
                 ),
                 ListTile(
+                  title: const Text('Priced recoverables'),
+                  subtitle: Text(() {
+                    final names = template.recoverableMaterials.toLowerCase();
+                    final priced = model.yardPrices
+                        .where(
+                          (price) =>
+                              names.contains(price.material.toLowerCase()),
+                        )
+                        .map(
+                          (price) =>
+                              '${price.material}: \$${price.price.toStringAsFixed(2)} ${price.unit}',
+                        )
+                        .toList();
+                    return priced.isEmpty
+                        ? 'No direct yard-price match. Automatic weight/yield valuation is not implemented.'
+                        : priced.join(', ');
+                  }()),
+                ),
+                ListTile(
                   title: const Text('Recoverable materials'),
                   subtitle: Text(template.recoverableMaterials),
                 ),

@@ -48,6 +48,7 @@ class _ScrapprAppState extends State<ScrapprApp> {
       InboxScreen(model: model, changed: changed),
       RunsScreen(model: model, changed: changed),
       ProcessingScreen(model: model, changed: changed),
+      CaptureScreen(model: model, changed: changed),
       LibraryScreen(model: model, changed: changed),
       ReportsScreen(model: model, changed: changed),
       SettingsScreen(model: model, changed: changed),
@@ -88,6 +89,10 @@ class _ScrapprAppState extends State<ScrapprApp> {
             NavigationDestination(
               icon: Icon(Icons.construction_outlined),
               label: 'Processing',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.add_a_photo_outlined),
+              label: 'Capture',
             ),
             NavigationDestination(
               icon: Icon(Icons.inventory_2_outlined),

@@ -5,10 +5,15 @@ class AssistantScreen extends StatefulWidget {
     super.key,
     required this.model,
     required this.service,
+    this.initialContextType = AssistantContextType.currentRun,
+    this.initialOwnerId,
+    this.initialPrompt,
   });
 
   final ScrapprModel model;
   final AssistantService service;
+  final AssistantContextType initialContextType;
+  final String? initialOwnerId, initialPrompt;
 
   @override
   State<AssistantScreen> createState() => _AssistantScreenState();
@@ -16,7 +21,7 @@ class AssistantScreen extends StatefulWidget {
 
 class _AssistantScreenState extends State<AssistantScreen> {
   final input = TextEditingController();
-  AssistantContextType contextType = AssistantContextType.currentRun;
+  late AssistantContextType contextType;
   AssistantContext? assistantContext;
   List<AssistantMessage> messages = const [];
   String? ownerId;
@@ -25,7 +30,13 @@ class _AssistantScreenState extends State<AssistantScreen> {
   @override
   void initState() {
     super.initState();
-    ownerId = widget.model.run.id;
+    contextType = widget.initialContextType;
+    ownerId =
+        widget.initialOwnerId ??
+        (contextType == AssistantContextType.currentRun
+            ? widget.model.run.id
+            : null);
+    input.text = widget.initialPrompt ?? '';
     unawaited(_loadContext());
   }
 

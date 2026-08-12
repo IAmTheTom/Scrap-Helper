@@ -167,6 +167,23 @@ class RouteService {
         ),
         actions: [
           if (plan.mapsUrl case final url?)
+            FilledButton.icon(
+              onPressed: () async {
+                final opened = await const ExternalLinkService().open(url);
+                if (!opened && dialogContext.mounted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Could not open Maps. Copy the URL instead.',
+                      ),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.open_in_new),
+              label: const Text('Open Maps'),
+            ),
+          if (plan.mapsUrl case final url?)
             TextButton.icon(
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: url));

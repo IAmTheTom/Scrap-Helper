@@ -13,6 +13,7 @@ abstract final class PhotoOwnerType {
   static const yard = 'yard';
   static const vehicle = 'vehicle';
   static const assistantContext = 'assistant_context';
+  static const unassignedCapture = 'unassigned_capture';
 }
 
 abstract interface class PhotoSourcePicker {
