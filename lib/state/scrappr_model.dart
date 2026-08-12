@@ -1,6 +1,8 @@
 part of '../main.dart';
 
 class ScrapprModel {
+  ScrapprModel.empty();
+
   ScrapprModel.seeded() {
     vehicles.addAll([
       Vehicle(
@@ -370,7 +372,9 @@ class ScrapprModel {
         destination: Destination.home,
         status: ItemStatus.lead,
         notes: 'Seller can help load.',
-        source: 'Marketplace placeholder',
+        source: 'Facebook Marketplace',
+        sourceId: 'facebook-marketplace',
+        ruleMatch: 'Free appliances: free dishwasher',
       ),
       ScrapItem(
         id: 'l2',
@@ -383,7 +387,9 @@ class ScrapprModel {
         destination: Destination.yard,
         status: ItemStatus.lead,
         notes: 'Second-floor pickup.',
-        source: 'Saved search placeholder',
+        source: 'Craigslist',
+        sourceId: 'craigslist',
+        ruleMatch: 'Free appliances: cabinet alias placeholder',
         duplicateWarning: true,
       ),
       ScrapItem(
@@ -398,6 +404,7 @@ class ScrapprModel {
         status: ItemStatus.claimed,
         notes: 'Porch pickup.',
         source: 'Manual',
+        sourceId: 'manual-entry',
       ),
       ScrapItem(
         id: 'l4',
@@ -411,6 +418,7 @@ class ScrapprModel {
         status: ItemStatus.needsStripping,
         notes: 'Keep closed until safe processing.',
         source: 'Manual',
+        sourceId: 'manual-entry',
       ),
     ]);
     run = RunPlan(
@@ -428,6 +436,85 @@ class ScrapprModel {
         notes: 'Mixed steel and wire.',
       ),
     );
+    searchSources.addAll([
+      SearchSource(
+        id: 'facebook-marketplace',
+        name: 'Facebook Marketplace',
+        type: 'Marketplace',
+        enabled: true,
+        defaultRadius: 25,
+        supportsDirectLink: true,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Manual review placeholder; no marketplace automation.',
+      ),
+      SearchSource(
+        id: 'craigslist',
+        name: 'Craigslist',
+        type: 'Classifieds',
+        enabled: true,
+        defaultRadius: 30,
+        supportsDirectLink: true,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Manual link and result entry placeholder.',
+      ),
+      SearchSource(
+        id: 'offerup',
+        name: 'OfferUp',
+        type: 'Marketplace',
+        enabled: false,
+        defaultRadius: 20,
+        supportsDirectLink: true,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Manual review placeholder.',
+      ),
+      SearchSource(
+        id: 'freecycle',
+        name: 'Freecycle',
+        type: 'Community reuse',
+        enabled: true,
+        defaultRadius: 25,
+        supportsDirectLink: true,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Local group availability varies.',
+      ),
+      SearchSource(
+        id: 'buy-nothing',
+        name: 'Buy Nothing',
+        type: 'Community group',
+        enabled: false,
+        defaultRadius: 10,
+        supportsDirectLink: false,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Manual entry only; respect local group rules.',
+      ),
+      SearchSource(
+        id: 'manual-entry',
+        name: 'Manual Entry',
+        type: 'Local input',
+        enabled: true,
+        defaultRadius: 25,
+        supportsDirectLink: false,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Items entered directly in Scrappr.',
+      ),
+      SearchSource(
+        id: 'custom-url-rss',
+        name: 'Custom URL / RSS Placeholder',
+        type: 'Custom feed',
+        enabled: false,
+        defaultRadius: 25,
+        supportsDirectLink: true,
+        supportsManualEntry: true,
+        supportsNotifications: false,
+        notes: 'Placeholder only; no feed automation is connected.',
+      ),
+    ]);
     searchRules.add(
       SearchRule(
         id: 'sr1',
@@ -435,7 +522,7 @@ class ScrapprModel {
         keywords: 'free dishwasher, washer, dryer',
         excludedWords: 'wanted, repair service',
         maxRadius: 25,
-        source: 'Marketplace placeholder',
+        sourceIds: ['facebook-marketplace', 'craigslist', 'freecycle'],
         notify: true,
         enabled: true,
       ),
@@ -448,11 +535,37 @@ class ScrapprModel {
   final items = <ScrapItem>[];
   final receipts = <Receipt>[];
   final searchRules = <SearchRule>[];
+  final searchSources = <SearchSource>[];
   final photos = <PhotoAttachment>[];
+  final notificationSettings = NotificationSettings(
+    notificationsEnabled: false,
+    notifyNewMatches: true,
+    notifyHighValueOnly: false,
+    minimumValueThreshold: 20,
+    quietHoursEnabled: false,
+    quietStart: '22:00',
+    quietEnd: '07:00',
+    notifyDuplicates: false,
+    notifyWorthwhileRoute: true,
+  );
+  final homeBase = HomeBaseSettings(
+    id: 'home',
+    label: 'Home Base',
+    address: 'Set your starting address',
+    cityStateZip: 'Vancouver, WA',
+    defaultFuelPrice: 4.25,
+    notes: 'Sample local placeholder. Update before future route planning.',
+  );
   late RunPlan run;
   DateTime? lastRefresh;
   Vehicle get vehicle => vehicles.firstWhere((v) => v.id == run.vehicleId);
   ObjectTemplate template(String id) => templates.firstWhere((t) => t.id == id);
+  SearchSource source(String id) =>
+      searchSources.firstWhere((source) => source.id == id);
+  String sourceSummary(SearchRule rule) => rule.sourceIds
+      .where((id) => searchSources.any((source) => source.id == id))
+      .map((id) => source(id).name)
+      .join(', ');
   List<ScrapItem> get runItems =>
       run.itemIds.map((id) => items.firstWhere((i) => i.id == id)).toList();
   List<ScrapItem> get leads =>
@@ -474,7 +587,7 @@ class ScrapprModel {
   );
   double get runMiles =>
       runItems.fold(0.0, (sum, item) => sum + item.miles * 2);
-  double get fuelCost => runMiles / vehicle.mpg * 4.25;
+  double get fuelCost => runMiles / vehicle.mpg * homeBase.defaultFuelPrice;
   int get runMinutes =>
       runItems.fold(
         0,
@@ -508,6 +621,12 @@ class ScrapprModel {
       receipts.fold(0.0, (sum, receipt) => sum + receipt.amount);
   void refreshSearch() {
     final id = DateTime.now().microsecondsSinceEpoch.toString();
+    final enabledRule = searchRules.where((rule) => rule.enabled).firstOrNull;
+    final enabledSourceIds = enabledRule?.sourceIds
+        .where((sourceId) => source(sourceId).enabled)
+        .toList();
+    final selectedSourceId = enabledSourceIds?.firstOrNull ?? 'manual-entry';
+    final selectedSource = source(selectedSourceId);
     items.add(
       ScrapItem(
         id: id,
@@ -520,7 +639,11 @@ class ScrapprModel {
         destination: Destination.yard,
         status: ItemStatus.lead,
         notes: 'Generated locally from enabled search rules.',
-        source: 'Search placeholder',
+        source: selectedSource.name,
+        sourceId: selectedSource.id,
+        ruleMatch: enabledRule == null
+            ? 'No enabled rule; local fallback'
+            : '${enabledRule.name}: ${enabledRule.keywords}',
       ),
     );
     lastRefresh = DateTime.now();

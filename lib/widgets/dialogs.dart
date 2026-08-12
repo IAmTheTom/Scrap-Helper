@@ -483,9 +483,10 @@ class _SearchRuleDialogState extends State<SearchRuleDialog> {
   late final radius = TextEditingController(
     text: '${widget.rule?.maxRadius ?? 25}',
   );
-  late final source = TextEditingController(
-    text: widget.rule?.source ?? 'Marketplace placeholder',
-  );
+  late final selectedSourceIds = <String>{
+    ...?widget.rule?.sourceIds,
+    if (widget.rule == null) 'facebook-marketplace',
+  };
   late bool notify = widget.rule?.notify ?? true,
       enabled = widget.rule?.enabled ?? true;
   @override
@@ -502,9 +503,28 @@ class _SearchRuleDialogState extends State<SearchRuleDialog> {
                 (keywords, 'Keywords'),
                 (excluded, 'Excluded words'),
                 (radius, 'Max radius (miles)'),
-                (source, 'Source'),
               ],
             ),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Sources'),
+            ),
+            for (final source in widget.model.searchSources)
+              CheckboxListTile(
+                dense: true,
+                title: Text(source.name),
+                subtitle: Text(
+                  source.enabled ? source.type : '${source.type} - disabled',
+                ),
+                value: selectedSourceIds.contains(source.id),
+                onChanged: (selected) => setState(() {
+                  if (selected ?? false) {
+                    selectedSourceIds.add(source.id);
+                  } else {
+                    selectedSourceIds.remove(source.id);
+                  }
+                }),
+              ),
             SwitchListTile(
               title: const Text('Notify'),
               value: notify,
@@ -534,7 +554,7 @@ class _SearchRuleDialogState extends State<SearchRuleDialog> {
                 keywords: '',
                 excludedWords: '',
                 maxRadius: 0,
-                source: '',
+                sourceIds: [],
                 notify: false,
                 enabled: false,
               );
@@ -542,10 +562,236 @@ class _SearchRuleDialogState extends State<SearchRuleDialog> {
           r.keywords = keywords.text;
           r.excludedWords = excluded.text;
           r.maxRadius = double.tryParse(radius.text) ?? 0;
-          r.source = source.text;
+          r.sourceIds
+            ..clear()
+            ..addAll(selectedSourceIds);
           r.notify = notify;
           r.enabled = enabled;
           if (widget.rule == null) widget.model.searchRules.add(r);
+          widget.changed();
+          Navigator.pop(context);
+        },
+        child: const Text('Save'),
+      ),
+    ],
+  );
+}
+
+class SearchSourceDialog extends StatefulWidget {
+  const SearchSourceDialog({
+    super.key,
+    required this.source,
+    required this.changed,
+  });
+
+  final SearchSource source;
+  final VoidCallback changed;
+
+  @override
+  State<SearchSourceDialog> createState() => _SearchSourceDialogState();
+}
+
+class _SearchSourceDialogState extends State<SearchSourceDialog> {
+  late final radius = TextEditingController(
+    text: '${widget.source.defaultRadius}',
+  );
+  late final notes = TextEditingController(text: widget.source.notes);
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text('Edit ${widget.source.name}'),
+    content: SizedBox(
+      width: 480,
+      child: Fields(
+        controllers: [(radius, 'Default radius (miles)'), (notes, 'Notes')],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: () {
+          widget.source.defaultRadius =
+              double.tryParse(radius.text) ?? widget.source.defaultRadius;
+          widget.source.notes = notes.text.trim();
+          widget.changed();
+          Navigator.pop(context);
+        },
+        child: const Text('Save'),
+      ),
+    ],
+  );
+}
+
+class NotificationSettingsDialog extends StatefulWidget {
+  const NotificationSettingsDialog({
+    super.key,
+    required this.settings,
+    required this.changed,
+  });
+
+  final NotificationSettings settings;
+  final VoidCallback changed;
+
+  @override
+  State<NotificationSettingsDialog> createState() =>
+      _NotificationSettingsDialogState();
+}
+
+class HomeBaseDialog extends StatefulWidget {
+  const HomeBaseDialog({
+    super.key,
+    required this.homeBase,
+    required this.changed,
+  });
+
+  final HomeBaseSettings homeBase;
+  final VoidCallback changed;
+
+  @override
+  State<HomeBaseDialog> createState() => _HomeBaseDialogState();
+}
+
+class _HomeBaseDialogState extends State<HomeBaseDialog> {
+  late final label = TextEditingController(text: widget.homeBase.label);
+  late final address = TextEditingController(text: widget.homeBase.address);
+  late final cityStateZip = TextEditingController(
+    text: widget.homeBase.cityStateZip,
+  );
+  late final fuelPrice = TextEditingController(
+    text: '${widget.homeBase.defaultFuelPrice}',
+  );
+  late final notes = TextEditingController(text: widget.homeBase.notes);
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Edit Home Base'),
+    content: SizedBox(
+      width: 520,
+      child: SingleChildScrollView(
+        child: Fields(
+          controllers: [
+            (label, 'Label'),
+            (address, 'Address'),
+            (cityStateZip, 'City, state, ZIP'),
+            (fuelPrice, 'Default fuel price per gallon'),
+            (notes, 'Notes'),
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: () {
+          widget.homeBase.label = label.text.trim();
+          widget.homeBase.address = address.text.trim();
+          widget.homeBase.cityStateZip = cityStateZip.text.trim();
+          widget.homeBase.defaultFuelPrice =
+              double.tryParse(fuelPrice.text) ??
+              widget.homeBase.defaultFuelPrice;
+          widget.homeBase.notes = notes.text.trim();
+          widget.changed();
+          Navigator.pop(context);
+        },
+        child: const Text('Save'),
+      ),
+    ],
+  );
+}
+
+class _NotificationSettingsDialogState
+    extends State<NotificationSettingsDialog> {
+  late bool enabled = widget.settings.notificationsEnabled;
+  late bool newMatches = widget.settings.notifyNewMatches;
+  late bool highValueOnly = widget.settings.notifyHighValueOnly;
+  late bool quietHours = widget.settings.quietHoursEnabled;
+  late bool duplicates = widget.settings.notifyDuplicates;
+  late bool worthwhileRoute = widget.settings.notifyWorthwhileRoute;
+  late final threshold = TextEditingController(
+    text: '${widget.settings.minimumValueThreshold}',
+  );
+  late final quietStart = TextEditingController(
+    text: widget.settings.quietStart,
+  );
+  late final quietEnd = TextEditingController(text: widget.settings.quietEnd);
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Notification Settings'),
+    content: SizedBox(
+      width: 520,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const ListTile(
+              leading: Icon(Icons.info_outline),
+              title: Text('Android notification integration pending.'),
+            ),
+            SwitchListTile(
+              title: const Text('Notifications enabled'),
+              value: enabled,
+              onChanged: (value) => setState(() => enabled = value),
+            ),
+            SwitchListTile(
+              title: const Text('Notify new matches'),
+              value: newMatches,
+              onChanged: (value) => setState(() => newMatches = value),
+            ),
+            SwitchListTile(
+              title: const Text('High value only'),
+              value: highValueOnly,
+              onChanged: (value) => setState(() => highValueOnly = value),
+            ),
+            SwitchListTile(
+              title: const Text('Quiet hours'),
+              value: quietHours,
+              onChanged: (value) => setState(() => quietHours = value),
+            ),
+            SwitchListTile(
+              title: const Text('Notify possible duplicates'),
+              value: duplicates,
+              onChanged: (value) => setState(() => duplicates = value),
+            ),
+            SwitchListTile(
+              title: const Text('Notify worthwhile routes'),
+              value: worthwhileRoute,
+              onChanged: (value) => setState(() => worthwhileRoute = value),
+            ),
+            Fields(
+              controllers: [
+                (threshold, 'Minimum value threshold'),
+                (quietStart, 'Quiet start (HH:MM)'),
+                (quietEnd, 'Quiet end (HH:MM)'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: () {
+          final settings = widget.settings;
+          settings.notificationsEnabled = enabled;
+          settings.notifyNewMatches = newMatches;
+          settings.notifyHighValueOnly = highValueOnly;
+          settings.minimumValueThreshold =
+              double.tryParse(threshold.text) ?? settings.minimumValueThreshold;
+          settings.quietHoursEnabled = quietHours;
+          settings.quietStart = quietStart.text.trim();
+          settings.quietEnd = quietEnd.text.trim();
+          settings.notifyDuplicates = duplicates;
+          settings.notifyWorthwhileRoute = worthwhileRoute;
           widget.changed();
           Navigator.pop(context);
         },

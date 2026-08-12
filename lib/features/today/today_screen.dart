@@ -21,6 +21,13 @@ class TodayScreen extends StatelessWidget {
     final activeProcessing = model.processingItems
         .where((item) => item.status != ItemStatus.complete)
         .length;
+    final nextAction = !model.fitsVehicle
+        ? 'Split the active run before leaving.'
+        : model.leads.isNotEmpty
+        ? 'Review ${model.leads.length} new lead${model.leads.length == 1 ? '' : 's'} and add the best pickup.'
+        : activeProcessing > 0
+        ? 'Process the oldest item in the at-home queue.'
+        : 'Refresh Search for new local placeholder leads.';
 
     return PageShell(
       title: 'Today',
@@ -32,9 +39,78 @@ class TodayScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'Scrappr command center',
-            style: Theme.of(context).textTheme.headlineSmall,
+          Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: ListTile(
+              dense: true,
+              leading: const Icon(Icons.bolt),
+              title: const Text('Best next action'),
+              subtitle: Text(nextAction),
+              trailing: TextButton(
+                onPressed: model.leads.isNotEmpty ? () => goTo(1) : null,
+                child: const Text('Open'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              model.run.name,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            Text(
+                              '${model.runItems.length} pickups - ${model.vehicle.name}',
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => goTo(2),
+                        child: const Text('View run'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _TodayMetric(
+                        label: 'Value',
+                        value: '\$${model.runValue.toStringAsFixed(0)}',
+                      ),
+                      _TodayMetric(
+                        label: 'Miles',
+                        value: model.runMiles.toStringAsFixed(0),
+                      ),
+                      _TodayMetric(
+                        label: 'Fuel',
+                        value: '\$${model.fuelCost.toStringAsFixed(2)}',
+                      ),
+                      _TodayMetric(
+                        label: 'Time',
+                        value: '${model.runMinutes} min',
+                      ),
+                      _TodayMetric(
+                        label: 'Fit',
+                        value: model.fitsVehicle ? 'Ready' : 'Warning',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
           sectionTitle(context, 'Quick actions'),
           Wrap(
@@ -73,57 +149,65 @@ class TodayScreen extends StatelessWidget {
               ),
             ],
           ),
-          sectionTitle(context, 'At a glance'),
-          metricGrid(context, [
-            Metric('New leads', '${model.leads.length}'),
-            Metric('Processing queue', '$activeProcessing'),
-            Metric('Ready for yard', '$ready'),
-            Metric(
-              'Active run',
-              '\${model.runValue.toStringAsFixed(0)}',
-              detail:
-                  '${model.runItems.length} pickups  -  ${model.runMiles.toStringAsFixed(0)} mi',
+          sectionTitle(context, 'Needs attention'),
+          if (model.fitsVehicle && model.leads.isEmpty && activeProcessing == 0)
+            const Card(
+              child: ListTile(
+                dense: true,
+                leading: Icon(Icons.check_circle_outline),
+                title: Text('Nothing urgent'),
+              ),
             ),
-          ]),
           if (!model.fitsVehicle)
             Card(
               color: Theme.of(context).colorScheme.errorContainer,
               child: const ListTile(
+                dense: true,
                 leading: Icon(Icons.warning_amber),
                 title: Text('Vehicle fit warning'),
-                subtitle: Text(
-                  'The active run exceeds the selected vehicle cargo limits. Split the run before leaving.',
-                ),
+                subtitle: Text('Split the active run before leaving.'),
               ),
             ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.route),
-              title: Text(model.run.name),
-              subtitle: Text(
-                '${model.vehicle.name}  -  \${model.fuelCost.toStringAsFixed(2)} fuel  -  ${model.runMinutes} min',
-              ),
+          if (model.leads.isNotEmpty)
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.inbox_outlined),
+              title: Text('${model.leads.length} search leads to review'),
               trailing: TextButton(
-                onPressed: () => goTo(2),
-                child: const Text('View run'),
+                onPressed: () => goTo(1),
+                child: const Text('Review'),
               ),
             ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.lightbulb_outline),
-              title: const Text('AI insight placeholder'),
-              subtitle: Text(
-                'Rule engine: ${model.fitsVehicle ? 'Your run fits. Compare yard prices before departure.' : 'Split the active run to stay within cargo limits.'}',
-              ),
+          if (activeProcessing > 0)
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.construction_outlined),
+              title: Text('$activeProcessing processing items open'),
+              subtitle: Text('$ready ready for yard'),
               trailing: TextButton(
-                onPressed: () => openAssistant(context, model),
-                child: const Text('Why?'),
+                onPressed: () => goTo(3),
+                child: const Text('Open'),
               ),
             ),
-          ),
         ],
       ),
     );
   }
+}
+
+class _TodayMetric extends StatelessWidget {
+  const _TodayMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Text('$label: $value'),
+  );
 }

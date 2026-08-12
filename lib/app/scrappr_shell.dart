@@ -1,12 +1,47 @@
 part of '../main.dart';
 
 class _ScrapprAppState extends State<ScrapprApp> {
-  final model = ScrapprModel.seeded();
+  late final AppDatabase database;
+  late final PersistenceService persistence;
+  ScrapprModel? loadedModel;
   int tab = 0;
-  void changed() => setState(() {});
+  ScrapprModel get model => loadedModel!;
+
+  @override
+  void initState() {
+    super.initState();
+    database = AppDatabase();
+    persistence = PersistenceService(database);
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    final loaded = await persistence.loadOrSeed();
+    if (!mounted) return;
+    setState(() => loadedModel = loaded);
+  }
+
+  void changed() {
+    setState(() {});
+    persistence.scheduleSave(model);
+  }
+
+  @override
+  void dispose() {
+    unawaited(persistence.closeWhenSaved());
+    super.dispose();
+  }
+
   void goTo(int index) => setState(() => tab = index);
   @override
   Widget build(BuildContext context) {
+    if (loadedModel == null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Scrappr',
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
     final screens = [
       TodayScreen(model: model, changed: changed, goTo: goTo),
       InboxScreen(model: model, changed: changed),

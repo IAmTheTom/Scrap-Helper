@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+import 'database/app_database.dart';
+import 'database/database_provider.dart';
 
 part 'app/scrappr_app.dart';
 part 'app/scrappr_shell.dart';
@@ -8,6 +13,9 @@ part 'models/vehicle.dart';
 part 'models/yard.dart';
 part 'models/yard_price.dart';
 part 'models/search_rule.dart';
+part 'models/search_source.dart';
+part 'models/notification_settings.dart';
+part 'models/home_base_settings.dart';
 part 'models/object_template.dart';
 part 'models/scrap_item.dart';
 part 'models/run_plan.dart';
@@ -17,6 +25,7 @@ part 'state/scrappr_model.dart';
 part 'services/camera_service.dart';
 part 'services/assistant_service.dart';
 part 'services/route_service.dart';
+part 'services/persistence_service.dart';
 part 'features/today/today_screen.dart';
 part 'features/inbox/inbox_screen.dart';
 part 'features/runs/runs_screen.dart';
@@ -30,4 +39,8 @@ part 'widgets/metric.dart';
 part 'widgets/dialogs.dart';
 part 'widgets/shared_ui.dart';
 
-void main() => runApp(const ScrapprApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDatabaseProvider();
+  runApp(const ScrapprApp());
+}

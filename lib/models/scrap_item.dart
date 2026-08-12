@@ -13,9 +13,12 @@ class ScrapItem {
     required this.status,
     required this.notes,
     required this.source,
+    this.sourceId,
+    this.ruleMatch = 'Manual item',
     this.duplicateWarning = false,
   });
   final String id;
+  String? sourceId;
   String title,
       templateId,
       pickupAddress,
@@ -23,6 +26,7 @@ class ScrapItem {
       timeWindow,
       notes,
       source;
+  String ruleMatch;
   double miles;
   Destination destination;
   ItemStatus status;

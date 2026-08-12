@@ -10,6 +10,37 @@ class SettingsScreen extends StatelessWidget {
     child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        const Card(
+          child: ListTile(
+            leading: Icon(Icons.storage_outlined),
+            title: Text('SQLite persistence active'),
+            subtitle: Text(
+              'Restart check: edit a vehicle note, add a receipt and object template, close Scrappr, then relaunch and verify them here.',
+            ),
+          ),
+        ),
+        sectionTitle(
+          context,
+          'Home Base',
+          action: TextButton(
+            onPressed: () => showDialog<void>(
+              context: context,
+              builder: (_) =>
+                  HomeBaseDialog(homeBase: model.homeBase, changed: changed),
+            ),
+            child: const Text('Edit'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.home_outlined),
+            title: Text(model.homeBase.label),
+            subtitle: Text(
+              '${model.homeBase.address}, ${model.homeBase.cityStateZip}\nFuel: \$${model.homeBase.defaultFuelPrice.toStringAsFixed(2)}/gal - ${model.homeBase.notes}',
+            ),
+            isThreeLine: true,
+          ),
+        ),
         sectionTitle(
           context,
           'Vehicles',
@@ -43,6 +74,9 @@ class SettingsScreen extends StatelessWidget {
                     ? null
                     : () {
                         model.vehicles.remove(vehicle);
+                        if (model.run.vehicleId == vehicle.id) {
+                          model.run.vehicleId = model.vehicles.first.id;
+                        }
                         changed();
                       },
                 icon: const Icon(Icons.delete_outline),
@@ -122,11 +156,62 @@ class SettingsScreen extends StatelessWidget {
                         model.yardPrices.removeWhere(
                           (p) => p.yardId == yard.id,
                         );
+                        model.receipts.removeWhere(
+                          (receipt) => receipt.yardId == yard.id,
+                        );
                         changed();
                       },
                       child: const Text('Delete'),
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+        sectionTitle(context, 'Search Sources'),
+        const Card(
+          child: ListTile(
+            leading: Icon(Icons.info_outline),
+            title: Text('Search integrations are placeholders'),
+            subtitle: Text(
+              'Sources configure in-memory workflow only. No marketplace scraping is connected.',
+            ),
+          ),
+        ),
+        for (final source in model.searchSources)
+          Card(
+            child: ExpansionTile(
+              leading: Switch(
+                value: source.enabled,
+                onChanged: (value) {
+                  source.enabled = value;
+                  changed();
+                },
+              ),
+              title: Text(source.name),
+              subtitle: Text(
+                '${source.type} - ${source.defaultRadius.toStringAsFixed(0)} mi default',
+              ),
+              children: [
+                ListTile(
+                  title: const Text('Capabilities'),
+                  subtitle: Text(
+                    'Direct links: ${source.supportsDirectLink ? 'yes' : 'no'} - '
+                    'Manual entry: ${source.supportsManualEntry ? 'yes' : 'no'} - '
+                    'Notifications: ${source.supportsNotifications ? 'yes' : 'no'}',
+                  ),
+                ),
+                ListTile(
+                  title: const Text('Notes'),
+                  subtitle: Text(source.notes),
+                  trailing: TextButton(
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) =>
+                          SearchSourceDialog(source: source, changed: changed),
+                    ),
+                    child: const Text('Edit'),
+                  ),
                 ),
               ],
             ),
@@ -156,7 +241,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               title: Text(rule.name),
               subtitle: Text(
-                '${rule.source}  -  ${rule.maxRadius} mi  -  ${rule.enabled ? 'Enabled' : 'Disabled'}  -  notify ${rule.notify ? 'yes' : 'no'}\nKeywords: ${rule.keywords}\nExclude: ${rule.excludedWords}',
+                '${model.sourceSummary(rule)} - ${rule.maxRadius} mi - ${rule.enabled ? 'Enabled' : 'Disabled'} - notify ${rule.notify ? 'yes' : 'no'}\nKeywords: ${rule.keywords}\nExclude: ${rule.excludedWords}',
               ),
               isThreeLine: true,
               trailing: IconButton(
@@ -168,6 +253,31 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ),
+        sectionTitle(
+          context,
+          'Notifications',
+          action: TextButton(
+            onPressed: () => showDialog<void>(
+              context: context,
+              builder: (_) => NotificationSettingsDialog(
+                settings: model.notificationSettings,
+                changed: changed,
+              ),
+            ),
+            child: const Text('Edit'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: const Text('Android notification integration pending.'),
+            subtitle: Text(
+              '${model.notificationSettings.notificationsEnabled ? 'Enabled in prototype' : 'Disabled'} - '
+              'threshold \$${model.notificationSettings.minimumValueThreshold.toStringAsFixed(0)} - '
+              'quiet hours ${model.notificationSettings.quietHoursEnabled ? '${model.notificationSettings.quietStart}-${model.notificationSettings.quietEnd}' : 'off'}',
+            ),
+          ),
+        ),
         const Card(
           child: ListTile(
             leading: Icon(Icons.camera_alt_outlined),

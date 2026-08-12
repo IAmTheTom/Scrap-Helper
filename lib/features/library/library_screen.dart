@@ -81,6 +81,14 @@ class LibraryScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
+                        final removedItemIds = model.items
+                            .where((item) => item.templateId == template.id)
+                            .map((item) => item.id)
+                            .toSet();
+                        model.items.removeWhere(
+                          (item) => removedItemIds.contains(item.id),
+                        );
+                        model.run.itemIds.removeWhere(removedItemIds.contains);
                         model.templates.remove(template);
                         changed();
                       },

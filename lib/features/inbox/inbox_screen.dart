@@ -4,6 +4,26 @@ class InboxScreen extends StatelessWidget {
   const InboxScreen({super.key, required this.model, required this.changed});
   final ScrapprModel model;
   final VoidCallback changed;
+
+  String notificationEligibility(ScrapItem item) {
+    final settings = model.notificationSettings;
+    if (!settings.notificationsEnabled) {
+      return 'Not eligible - prototype notifications are disabled';
+    }
+    if (!settings.notifyNewMatches) {
+      return 'Not eligible - new match notifications are off';
+    }
+    final value = model.template(item.templateId).likelyValue;
+    if (settings.notifyHighValueOnly &&
+        value < settings.minimumValueThreshold) {
+      return 'Not eligible - below the value threshold';
+    }
+    if (item.duplicateWarning && !settings.notifyDuplicates) {
+      return 'Not eligible - duplicate notifications are off';
+    }
+    return 'Eligible placeholder - Android integration pending';
+  }
+
   @override
   Widget build(BuildContext context) => PageShell(
     title: 'Inbox',
@@ -79,9 +99,15 @@ class InboxScreen extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    '${item.source}  -  ${item.locationName}  -  ${item.miles.toStringAsFixed(1)} mi',
+                    'Source: ${item.source} - ${item.locationName} - ${item.miles.toStringAsFixed(1)} mi',
                   ),
                   Text('${item.pickupAddress}  -  ${item.timeWindow}'),
+                  const SizedBox(height: 6),
+                  Text('Rule match: ${item.ruleMatch}'),
+                  Text(
+                    'Notification: ${notificationEligibility(item)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   if (item.duplicateWarning)
                     const Padding(
                       padding: EdgeInsets.only(top: 6),

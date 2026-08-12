@@ -50,3 +50,42 @@ Thumbs.db
 
 # Local Codex/planning notes
 Scrappr Build Needs*.md
+
+# Local Codex/update snapshots
+Scrappr * Update/
+Scrappr Build Needs*/
+Backups/
+Temp/
+_archive/
+.pack_*/
+.pack35_download/
+
+# Generated Flutter/Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Local scratch / old folders
+Flutter/
+Search Agent/
+Tools/
+Docs/
+
+# Unsupported current targets
+ios/
+macos/
+linux/
+web/
+
+# Python/local envs
+**/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Local notes / packages
+*.zip
+README-Implementation-Pack-*.md
+README-Pack-*.md
+*.iml
