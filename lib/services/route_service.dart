@@ -41,6 +41,31 @@ class RouteService {
             'Add at least one item to the active run before creating a route.',
       );
     }
+    if (homeAddress.isEmpty) {
+      return RoutePlan(
+        stops: stops,
+        mapsUrl: null,
+        summary: '${run.name}: home base address is missing.',
+        message: 'Add a home base address before creating a route handoff.',
+      );
+    }
+
+    final missingPickup = runItems
+        .where(
+          (item) =>
+              item.pickupAddress.trim().isEmpty &&
+              item.locationName.trim().isEmpty,
+        )
+        .firstOrNull;
+    if (missingPickup != null) {
+      return RoutePlan(
+        stops: stops,
+        mapsUrl: null,
+        summary: '${run.name}: ${missingPickup.title} has no pickup location.',
+        message:
+            'Add a pickup address or location before creating a route handoff.',
+      );
+    }
 
     for (final item in runItems) {
       final address = item.pickupAddress.trim().isNotEmpty
@@ -66,6 +91,15 @@ class RouteService {
       (item) => item.destination == Destination.home,
     );
     final yard = needsYard ? _preferredYard(yards) : null;
+    if (yard != null &&
+        _joinedAddress(yard.address, yard.cityStateZip).isEmpty) {
+      return RoutePlan(
+        stops: stops,
+        mapsUrl: null,
+        summary: '${run.name}: ${yard.name} has no address.',
+        message: 'Add a yard address before creating a route handoff.',
+      );
+    }
     if (yard != null) {
       stops.add(
         RouteStop(

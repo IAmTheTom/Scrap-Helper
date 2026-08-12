@@ -203,9 +203,15 @@ class AssistantService {
       return 'No matching item is selected for this context.';
     }
     final item = matches.first;
+    final ownerType = switch (context.type) {
+      AssistantContextType.inboxItem => PhotoOwnerType.inboxItem,
+      AssistantContextType.runItem => PhotoOwnerType.runItem,
+      AssistantContextType.processingItem => PhotoOwnerType.processingItem,
+      _ => PhotoOwnerType.inboxItem,
+    };
     return '${item.title} is ${statusLabel(item.status).toLowerCase()}, is '
         'destined for ${destinationLabel(item.destination).toLowerCase()}, and '
-        'has ${model.photoCount(item.id, 'scrap_item')} attached photo(s).';
+        'has ${model.photoCount(item.id, ownerType)} attached photo(s).';
   }
 
   String _templateSummary(ScrapprModel model, AssistantContext context) {

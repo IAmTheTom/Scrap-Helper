@@ -139,6 +139,23 @@ class PhotoAttachmentService {
     attachments.removeWhere((photo) => photo.id == attachment.id);
   }
 
+  Future<void> deleteForOwner(
+    List<PhotoAttachment> attachments, {
+    required String ownerId,
+    required Iterable<String> ownerTypes,
+  }) async {
+    final types = ownerTypes.toSet();
+    final matches = attachments
+        .where(
+          (photo) =>
+              photo.ownerId == ownerId && types.contains(photo.ownerType),
+        )
+        .toList();
+    for (final attachment in matches) {
+      await delete(attachments, attachment);
+    }
+  }
+
   String _safeSegment(String value) =>
       value.replaceAll(RegExp('[^A-Za-z0-9._-]'), '_');
 }

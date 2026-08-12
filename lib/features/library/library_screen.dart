@@ -96,6 +96,17 @@ class LibraryScreen extends StatelessWidget {
                         );
                         model.run.itemIds.removeWhere(removedItemIds.contains);
                         final service = PhotoAttachmentService();
+                        for (final itemId in removedItemIds) {
+                          await service.deleteForOwner(
+                            model.photos,
+                            ownerId: itemId,
+                            ownerTypes: const [
+                              PhotoOwnerType.inboxItem,
+                              PhotoOwnerType.runItem,
+                              PhotoOwnerType.processingItem,
+                            ],
+                          );
+                        }
                         final photos = service.listForOwner(
                           model.photos,
                           ownerId: template.id,

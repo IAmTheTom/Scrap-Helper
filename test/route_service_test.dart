@@ -164,6 +164,19 @@ void main() {
     expect(plan.summary, contains('no pickups'));
     expect(plan.message, contains('Add at least one item'));
   });
+
+  test('missing pickup location blocks an unusable route URL', () {
+    final item = _item('one', Destination.home, '')..locationName = '';
+    final plan = service.buildPlan(
+      homeBase: home,
+      run: _run([item.id]),
+      items: [item],
+      yards: [preferredYard],
+    );
+
+    expect(plan.canHandOff, isFalse);
+    expect(plan.message, contains('pickup address or location'));
+  });
 }
 
 RunPlan _run(List<String> itemIds) => RunPlan(

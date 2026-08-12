@@ -151,7 +151,24 @@ class SettingsScreen extends StatelessWidget {
                       child: const Text('Edit yard'),
                     ),
                     TextButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        final service = PhotoAttachmentService();
+                        await service.deleteForOwner(
+                          model.photos,
+                          ownerId: yard.id,
+                          ownerTypes: const [PhotoOwnerType.yard],
+                        );
+                        final receiptIds = model.receipts
+                            .where((receipt) => receipt.yardId == yard.id)
+                            .map((receipt) => receipt.id)
+                            .toList();
+                        for (final receiptId in receiptIds) {
+                          await service.deleteForOwner(
+                            model.photos,
+                            ownerId: receiptId,
+                            ownerTypes: const [PhotoOwnerType.receipt],
+                          );
+                        }
                         model.yards.remove(yard);
                         model.yardPrices.removeWhere(
                           (p) => p.yardId == yard.id,
