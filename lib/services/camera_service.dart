@@ -77,7 +77,15 @@ class CameraService {
       case PhotoAttachmentResult.unsupported:
         _message(
           context,
-          'Photo capture is not available on this platform yet.',
+          'Camera capture failed or is unavailable on this device.',
+        );
+        return;
+      case PhotoAttachmentResult.failed:
+        _message(
+          context,
+          action == PhotoAttachmentAction.camera
+              ? 'Camera capture failed or is unavailable on this device.'
+              : 'Photo selection failed or is unavailable on this device.',
         );
         return;
     }

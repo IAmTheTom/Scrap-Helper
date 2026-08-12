@@ -2,7 +2,14 @@ part of '../main.dart';
 
 enum PhotoAttachmentAction { camera, gallery }
 
-enum PhotoAttachmentResult { attached, cancelled, unsupported }
+enum PhotoAttachmentResult { attached, cancelled, unsupported, failed }
+
+class PhotoPickerFailure implements Exception {
+  const PhotoPickerFailure(this.action, [this.cause]);
+
+  final PhotoAttachmentAction action;
+  final Object? cause;
+}
 
 abstract final class PhotoOwnerType {
   static const inboxItem = 'inbox_item';
@@ -30,12 +37,24 @@ class ImagePickerPhotoSourcePicker implements PhotoSourcePicker {
   @override
   Future<String?> capturePhoto() async {
     if (!Platform.isAndroid) return null;
-    return (await _picker.pickImage(source: ImageSource.camera))?.path;
+    try {
+      return (await _picker.pickImage(source: ImageSource.camera))?.path;
+    } on PlatformException catch (error) {
+      throw PhotoPickerFailure(PhotoAttachmentAction.camera, error);
+    } catch (error) {
+      throw PhotoPickerFailure(PhotoAttachmentAction.camera, error);
+    }
   }
 
   @override
   Future<String?> choosePhoto() async {
-    return (await _picker.pickImage(source: ImageSource.gallery))?.path;
+    try {
+      return (await _picker.pickImage(source: ImageSource.gallery))?.path;
+    } on PlatformException catch (error) {
+      throw PhotoPickerFailure(PhotoAttachmentAction.gallery, error);
+    } catch (error) {
+      throw PhotoPickerFailure(PhotoAttachmentAction.gallery, error);
+    }
   }
 }
 
@@ -64,42 +83,50 @@ class PhotoAttachmentService {
     if (action == PhotoAttachmentAction.camera && !_cameraSupported) {
       return (PhotoAttachmentResult.unsupported, null);
     }
-    final sourcePath = action == PhotoAttachmentAction.camera
-        ? await _picker.capturePhoto()
-        : await _picker.choosePhoto();
-    if (sourcePath == null || sourcePath.isEmpty) {
-      return (PhotoAttachmentResult.cancelled, null);
-    }
+    try {
+      final sourcePath = action == PhotoAttachmentAction.camera
+          ? await _picker.capturePhoto()
+          : await _picker.choosePhoto();
+      if (sourcePath == null || sourcePath.isEmpty) {
+        return (PhotoAttachmentResult.cancelled, null);
+      }
 
-    final source = File(sourcePath);
-    if (!await source.exists()) {
-      return (PhotoAttachmentResult.cancelled, null);
+      final source = File(sourcePath);
+      if (!await source.exists()) {
+        return (PhotoAttachmentResult.failed, null);
+      }
+      final id = DateTime.now().microsecondsSinceEpoch.toString();
+      final root = await _storageDirectoryProvider();
+      final safeOwnerType = _safeSegment(ownerType);
+      final safeOwnerId = _safeSegment(ownerId);
+      final directory = Directory(
+        path_util.join(root.path, 'photos', safeOwnerType, safeOwnerId),
+      );
+      await directory.create(recursive: true);
+      final extension = path_util.extension(source.path).toLowerCase();
+      final storedPath = path_util.join(
+        directory.path,
+        '$id${extension.isEmpty ? '.jpg' : extension}',
+      );
+      await source.copy(storedPath);
+      return (
+        PhotoAttachmentResult.attached,
+        PhotoAttachment(
+          id: id,
+          ownerId: ownerId,
+          ownerType: ownerType,
+          localPath: storedPath,
+          caption: caption,
+          createdAt: DateTime.now(),
+        ),
+      );
+    } on PhotoPickerFailure {
+      return (PhotoAttachmentResult.failed, null);
+    } on PlatformException {
+      return (PhotoAttachmentResult.failed, null);
+    } catch (_) {
+      return (PhotoAttachmentResult.failed, null);
     }
-    final id = DateTime.now().microsecondsSinceEpoch.toString();
-    final root = await _storageDirectoryProvider();
-    final safeOwnerType = _safeSegment(ownerType);
-    final safeOwnerId = _safeSegment(ownerId);
-    final directory = Directory(
-      path_util.join(root.path, 'photos', safeOwnerType, safeOwnerId),
-    );
-    await directory.create(recursive: true);
-    final extension = path_util.extension(source.path).toLowerCase();
-    final storedPath = path_util.join(
-      directory.path,
-      '$id${extension.isEmpty ? '.jpg' : extension}',
-    );
-    await source.copy(storedPath);
-    return (
-      PhotoAttachmentResult.attached,
-      PhotoAttachment(
-        id: id,
-        ownerId: ownerId,
-        ownerType: ownerType,
-        localPath: storedPath,
-        caption: caption,
-        createdAt: DateTime.now(),
-      ),
-    );
   }
 
   List<PhotoAttachment> listForOwner(

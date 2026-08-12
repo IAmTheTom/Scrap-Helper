@@ -32,7 +32,11 @@ class _CaptureScreenState extends State<CaptureScreen> {
       PhotoAttachmentResult.attached => 'Photo saved.',
       PhotoAttachmentResult.cancelled => 'Photo selection cancelled.',
       PhotoAttachmentResult.unsupported =>
-        'Camera capture is not available on this platform.',
+        'Camera capture failed or is unavailable on this device.',
+      PhotoAttachmentResult.failed =>
+        action == PhotoAttachmentAction.camera
+            ? 'Camera capture failed or is unavailable on this device.'
+            : 'Photo selection failed or is unavailable on this device.',
     };
     if (attachment != null) {
       widget.model.photos.add(attachment);
